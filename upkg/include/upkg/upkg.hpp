@@ -1,5 +1,4 @@
 ﻿#pragma once
-// #pragma execution_character_set("utf-8")
 
 #include <QtWidgets/QMainWindow>
 #include <QStandardItemModel>
@@ -15,6 +14,7 @@
 #include <QDebug>
 
 #include "ui_upkg.h"
+#include "upkg/datamodel.hpp"
 
 class upkg : public QMainWindow
 {
@@ -29,7 +29,12 @@ private:
 	void loadSettings() noexcept;
 	void saveSettings() noexcept;
 
+	void loadDir() noexcept;
+
+	QFileInfoList walkDir(const QDir& dir);
+
 private:
 	Ui::upkgClass m_ui;
 	QSettings m_settings;
+	Datamodel* m_datamodel;
 };

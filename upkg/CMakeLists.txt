@@ -53,9 +53,11 @@ set(upkg_SRCS
 	${RC_SRCS}
 
 	include/upkg/upkg.hpp
+	include/upkg/datamodel.hpp
 
 	src/main.cpp
 	src/upkg.cpp
+	src/datamodel.cpp
 
 	src/upkg.rc
 )
