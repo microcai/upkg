@@ -43,6 +43,8 @@ void upkg::loadSettings() noexcept
 	auto xmlFileName = m_settings.value("Xml").toString();
 	if (!xmlFileName.isEmpty())
 		m_ui.XmlEdit->setText(xmlFileName);
+	if (m_settings.contains("WinSize"))
+		resize(m_settings.value("WinSize").toSize());
 }
 
 void upkg::saveSettings() noexcept
@@ -56,4 +58,5 @@ void upkg::saveSettings() noexcept
 	m_settings.setValue("OutputDir", outputDir);
 	m_settings.setValue("Url", urlPath);
 	m_settings.setValue("Xml", xmlFileName);
+	m_settings.setValue("WinSize", size());
 }
