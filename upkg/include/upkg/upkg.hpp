@@ -23,6 +23,13 @@ public:
 	upkg(QWidget *parent = Q_NULLPTR);
 	~upkg();
 
+public:
+
 private:
-	Ui::upkgClass ui;
+	void loadSettings() noexcept;
+	void saveSettings() noexcept;
+
+private:
+	Ui::upkgClass m_ui;
+	QSettings m_settings;
 };

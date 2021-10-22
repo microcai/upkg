@@ -34,6 +34,9 @@ Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin);
 
 int main(int argc, char *argv[])
 {
+	QCoreApplication::setOrganizationName(QString("Daimage"));
+	QCoreApplication::setApplicationName(QString("Upkg"));
+
 	QApplication a(argc, argv);
 	upkg w;
 	w.show();
