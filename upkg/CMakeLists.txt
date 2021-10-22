@@ -2,8 +2,8 @@
 project(upkg)
 option(ENABLE_QT_STATIC "static llink to qt" ON)
 
-#configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/upkg.rc.in
-#		${CMAKE_CURRENT_SOURCE_DIR}/src/upkg.rc @ONLY NEWLINE_STYLE LF)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/upkg.rc.in
+		${CMAKE_CURRENT_SOURCE_DIR}/src/upkg.rc @ONLY NEWLINE_STYLE LF)
 
 set(CMAKE_AUTOMOC ON)
 set(QtComponent Core Gui Widgets)
@@ -37,7 +37,6 @@ if(WIN32 AND MSVC AND ENABLE_QT_STATIC)
 	add_definitions(-DQT_STATICPLUGIN)
 endif()
 
-
 qt6_wrap_ui(UI_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/upkg.ui)
 
 set_property(SOURCE ${UI_SRCS} PROPERTY SKIP_AUTOMOC ON)
@@ -49,6 +48,15 @@ include_directories(${Qt6Core_INCLUDE_DIRS})
 include_directories(${Qt6Gui_INCLUDE_DIRS})
 include_directories(${Qt6Widgets_INCLUDE_DIRS})
 
+# qpathedit
+#qt6_add_resources(RC_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/qpathedit/qpathedit_res.qrc)
+#set(upkg_qpathedit_SRCS
+#	qpathedit/qpathedit.cpp
+#	qpathedit/qpathedit.h
+#)
+#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/qpathedit)
+
+
 set(upkg_SRCS
 	${UI_SRCS}
 	${RC_SRCS}
@@ -57,6 +65,8 @@ set(upkg_SRCS
 
 	src/main.cpp
 	src/upkg.cpp
+
+	src/upkg.rc
 )
 
 if (WIN32)

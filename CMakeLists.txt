@@ -98,7 +98,8 @@ add_subdirectory(third_party/boost)
 # add zip
 if (WIN32 OR NOT ENABLE_SYSTEM_ZLIB)
 	add_subdirectory(third_party/zlib EXCLUDE_FROM_ALL)
-	set(ZLIB_LIBRARIES zlib)
+	set(ZLIB_LIBRARIES zlibstatic)
+	set(MINIZIP_LIBRARIES minizip)
 	set(ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/zlib ${CMAKE_CURRENT_SOURCE_DIR}/third_party/zlib/contrib/minizip)
 else()
 	find_package(ZLIB REQUIRED)
@@ -115,10 +116,7 @@ add_subdirectory(third_party/fmt EXCLUDE_FROM_ALL)
 set(FMT_LIBRARIES fmt)
 set(FMT_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/third_party/fmt ${CMAKE_CURRENT_SOURCE_DIR}/third_party/fmt)
 
-set(THIRD_PARTY_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
-
 include_directories(
-	${THIRD_PARTY_DIRS}
 	${BOOST_INCLUDE_DIRS}
 	${ZLIB_INCLUDE_DIRS}
 	${TINYXML2_INCLUDE_DIRS}
