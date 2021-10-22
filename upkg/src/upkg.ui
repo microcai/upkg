@@ -29,7 +29,7 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_7">
           <item>
-           <widget class="QLineEdit" name="inputDirEdit"/>
+           <widget class="QLineEdit" name="InputDirEdit"/>
           </item>
           <item>
            <widget class="QToolButton" name="InputDirBtn">
@@ -122,7 +122,7 @@
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <tabstops>
-  <tabstop>inputDirEdit</tabstop>
+  <tabstop>InputDirEdit</tabstop>
   <tabstop>InputDirBtn</tabstop>
   <tabstop>OutputDirEdit</tabstop>
   <tabstop>OutputDirBtn</tabstop>
