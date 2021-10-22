@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+﻿#cmake_minimum_required(VERSION 2.6)
 project(minizip C)
 
 file(GLOB MINIZIPLIB_SRC unzip.c unzip.h)
