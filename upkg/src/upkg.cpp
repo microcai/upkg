@@ -9,14 +9,14 @@ upkg::upkg(QWidget *parent)
 	// QString blah = QString(QCryptographicHash::hash(("1"), QCryptographicHash::Md5).toHex());
 	// this->setWindowTitle(blah);
 
-/*
+
 	ui.inputDirEdit->setReadOnly(true);
 	QObject::connect(ui.InputDirBtn, &QPushButton::clicked, [this]() mutable
 	{
-		QString path = QDir::toNativeSeparators(QFileDialog::getExistingDirectory(this, tr("Input Dir"), QDir::currentPath()));
+		QString path = QDir::toNativeSeparators(QFileDialog::getExistingDirectory(this, tr("请选择源目录"), QDir::currentPath()));
 		ui.inputDirEdit->setText(path);
 	});
-*/
+
 }
 
 upkg::~upkg()

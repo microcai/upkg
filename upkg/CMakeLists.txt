@@ -48,15 +48,6 @@ include_directories(${Qt6Core_INCLUDE_DIRS})
 include_directories(${Qt6Gui_INCLUDE_DIRS})
 include_directories(${Qt6Widgets_INCLUDE_DIRS})
 
-# qpathedit
-#qt6_add_resources(RC_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/qpathedit/qpathedit_res.qrc)
-#set(upkg_qpathedit_SRCS
-#	qpathedit/qpathedit.cpp
-#	qpathedit/qpathedit.h
-#)
-#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/qpathedit)
-
-
 set(upkg_SRCS
 	${UI_SRCS}
 	${RC_SRCS}
