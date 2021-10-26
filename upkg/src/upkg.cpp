@@ -59,18 +59,12 @@ upkg::upkg(QWidget *parent)
 {
 	m_ui.setupUi(this);
 
-	loadSettings();
-
 	m_datamodel = new Datamodel(m_ui.fileListView);
 	m_ui.fileListView->setModel(m_datamodel);
 
 	m_ui.fileListView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	m_ui.fileListView->setSelectionMode(QAbstractItemView::SingleSelection);
 	m_ui.fileListView->horizontalHeader()->setDisabled(false);
-
-	// m_ui.fileListView->verticalHeader()->setVisible(false);
-	// m_ui.fileListView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-	// m_ui.fileListView->horizontalHeader()->setMinimumSectionSize(10);
 
 	for (int c = 0; c < m_ui.fileListView->horizontalHeader()->count(); ++c)
 		m_ui.fileListView->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
@@ -118,12 +112,18 @@ upkg::upkg(QWidget *parent)
 	{
 	});
 
-	QObject::connect(this, &upkg::workDir, [this](const QDir& dir)
+	QObject::connect(this, &upkg::workDir, [this](const QDir& dir) mutable
 	{
 		walkDir(dir);
 	});
 
-	loadDir();
+	QObject::connect(this, &upkg::scanDir, this, [this]() mutable
+	{
+		loadSettings();
+		loadDir();
+	}, Qt::QueuedConnection);
+
+	Q_EMIT this->scanDir();
 }
 
 upkg::~upkg()
@@ -149,6 +149,20 @@ void upkg::loadSettings() noexcept
 		m_ui.XmlEdit->setText(xmlFileName);
 	if (m_settings.contains("WinSize"))
 		resize(m_settings.value("WinSize").toSize());
+	if (m_settings.contains("Geometry"))
+		restoreGeometry(m_settings.value("Geometry").toByteArray());
+	if (m_settings.contains("State"))
+		restoreState(m_settings.value("State").toByteArray());
+
+	for (int c = 0; c < m_ui.fileListView->horizontalHeader()->count(); ++c)
+	{
+		auto columnName = "Columns" + QString::number(c);
+		if (m_settings.contains(columnName))
+		{
+			auto column = m_settings.value(columnName).toInt();
+			m_ui.fileListView->setColumnWidth(c, column);
+		}
+	}
 }
 
 void upkg::saveSettings() noexcept
@@ -158,11 +172,20 @@ void upkg::saveSettings() noexcept
 	auto urlPath = m_ui.UrlEdit->text();
 	auto xmlFileName = m_ui.XmlEdit->text();
 
+	for (int c = 0; c < m_ui.fileListView->horizontalHeader()->count(); ++c)
+	{
+		auto column = m_ui.fileListView->columnWidth(c);
+		m_settings.setValue("Columns" + QString::number(c), column);
+	}
+
 	m_settings.setValue("InputDir", inputDir);
 	m_settings.setValue("OutputDir", outputDir);
 	m_settings.setValue("Url", urlPath);
 	m_settings.setValue("Xml", xmlFileName);
 	m_settings.setValue("WinSize", size());
+	m_settings.setValue("State", saveState());
+	m_settings.setValue("Geometry", saveGeometry());
+
 }
 
 void upkg::loadDir() noexcept
@@ -181,7 +204,6 @@ void upkg::loadDir() noexcept
 	}
 
 	m_future = QtConcurrent::run([this, inputDir] { workDir(inputDir); });
-	qDebug() << "waitForFinished";
 }
 
 QFileInfoList upkg::walkDir(const QDir& dir)

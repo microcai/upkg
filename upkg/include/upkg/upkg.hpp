@@ -39,6 +39,7 @@ private:
 public:
 signals:
 	void workDir(const QDir&);
+	void scanDir();
 
 private:
 	Ui::upkgClass m_ui;
