@@ -6,7 +6,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/upkg.rc.in
 		${CMAKE_CURRENT_SOURCE_DIR}/src/upkg.rc @ONLY NEWLINE_STYLE LF)
 
 set(CMAKE_AUTOMOC ON)
-set(QtComponent Core Gui Widgets)
+set(QtComponent Core Gui Widgets Concurrent)
 
 if(WIN32)
 	if(MSVC AND ENABLE_QT_STATIC)
@@ -15,7 +15,7 @@ if(WIN32)
 endif()
 
 find_package(Qt6 6.2.0 COMPONENTS ${QtComponent} REQUIRED)
-link_libraries(Qt6::Core Qt6::Gui Qt6::Widgets)
+link_libraries(Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Concurrent)
 
 if(WIN32 AND MSVC AND ENABLE_QT_STATIC)
 	# For static Windows builds, we also need to pull in the Qt6 Platform
@@ -25,6 +25,7 @@ if(WIN32 AND MSVC AND ENABLE_QT_STATIC)
 
 	link_libraries(
 		${Qt6HB_LIBRARIES}
+
 		${Qt6PNG_LIBRARIES}
 		${Qt6QTPCRE_LIBRARIES}
 		${Qt6QTFREETYPE_LIBRARIES}

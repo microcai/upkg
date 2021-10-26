@@ -6,6 +6,7 @@
 
 struct ModelData
 {
+	QString m_filepath;
 	QString m_filename;
 	QString m_fileversion;
 	QString m_md5;
@@ -24,7 +25,8 @@ class Datamodel : public QAbstractTableModel
 public:
 	Datamodel(QObject *parent = 0);
 
-	void insertData(const ModelData& n_data);
+	void insertData(const ModelData& data);
+	void insertData(const std::vector<ModelData>& data);
 	void deleteAllData();
 
 	int rowCount(const QModelIndex& parent) const;

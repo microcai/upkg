@@ -110,6 +110,13 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="stopButton">
+          <property name="text">
+           <string>停止工作</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
      </layout>

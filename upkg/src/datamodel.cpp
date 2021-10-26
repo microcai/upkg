@@ -12,6 +12,14 @@ void Datamodel::insertData(const ModelData& data)
 	endResetModel();
 }
 
+void Datamodel::insertData(const std::vector<ModelData>& data)
+{
+	beginResetModel();
+	for (const auto& d : data)
+		m_data.push_back(d);
+	endResetModel();
+}
+
 void Datamodel::deleteAllData()
 {
 	beginResetModel();
@@ -26,7 +34,7 @@ int Datamodel::rowCount(const QModelIndex& parent) const
 
 int Datamodel::columnCount(const QModelIndex& parent) const
 {
-	return 9;
+	return 8;
 }
 
 QVariant Datamodel::headerData(int section, Qt::Orientation orientation, int role /* = Qt::DisplayRole */) const
@@ -50,10 +58,8 @@ QVariant Datamodel::headerData(int section, Qt::Orientation orientation, int rol
 			case 5:
 				return QStringLiteral("压缩后文件大小");
 			case 6:
-				return QStringLiteral("压缩方式");
-			case 7:
 				return QStringLiteral("检查存在");
-			case 8:
+			case 7:
 				return QStringLiteral("自定义URL");
 			default:
 				break;
@@ -83,10 +89,8 @@ QVariant Datamodel::data(const QModelIndex& index, int role /* = Qt::DisplayRole
 		case 5:
 			return m_data[index.row()].m_zipfilesize;
 		case 6:
-			return m_data[index.row()].m_file_type;
-		case 7:
 			return m_data[index.row()].m_check;
-		case 8:
+		case 7:
 			return m_data[index.row()].m_url;
 		default:
 			break;

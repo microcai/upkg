@@ -1,11 +1,14 @@
 ﻿#include "upkg/upkg.hpp"
 
+#include <QDebug>
 #include <QCryptographicHash>
 
 #ifdef _MSC_VER
 #	include <windows.h>
 #	pragma comment(lib, "Version")
 #endif
+
+extern QFont* global_default_font;
 
 QString GetFileVertion(QString fullName)
 {
@@ -63,20 +66,30 @@ upkg::upkg(QWidget *parent)
 
 	m_ui.fileListView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	m_ui.fileListView->setSelectionMode(QAbstractItemView::SingleSelection);
+	m_ui.fileListView->horizontalHeader()->setDisabled(false);
 
 	// m_ui.fileListView->verticalHeader()->setVisible(false);
 	// m_ui.fileListView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 	// m_ui.fileListView->horizontalHeader()->setMinimumSectionSize(10);
 
-	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
-	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
-	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
-	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(4, QHeaderView::Stretch);
-	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(5, QHeaderView::Stretch);
-	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(6, QHeaderView::Stretch);
-	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(7, QHeaderView::Stretch);
-	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(8, QHeaderView::Stretch);
+	for (int c = 0; c < m_ui.fileListView->horizontalHeader()->count(); ++c)
+		m_ui.fileListView->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
+
+	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
+	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Interactive);
+	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Interactive);
+	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Interactive);
+	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(4, QHeaderView::Interactive);
+	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(5, QHeaderView::Interactive);
+	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(6, QHeaderView::Interactive);
+	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(7, QHeaderView::Interactive);
+
+	QFontMetrics fm(*global_default_font);
+	auto columnWidth = fm.horizontalAdvance(QString("b0baee9d279d34fa1dfd71aadb908c3f")) + 7;	// 7 column line width.
+	m_ui.fileListView->setColumnWidth(2, columnWidth);
+	m_ui.fileListView->setColumnWidth(3, columnWidth);
+
+	m_ui.fileListView->horizontalHeader()->setStretchLastSection(true);
 
 	m_ui.fileListView->show();
 
@@ -84,7 +97,14 @@ upkg::upkg(QWidget *parent)
 	QObject::connect(m_ui.InputDirBtn, &QPushButton::clicked, [this]() mutable
 	{
 		QString path = QDir::toNativeSeparators(QFileDialog::getExistingDirectory(this, tr("请选择源目录"), QDir::currentPath()));
-		m_ui.InputDirEdit->setText(path);
+		auto oriPath = m_ui.InputDirEdit->text();
+		if (oriPath != path)
+		{
+			m_datamodel->deleteAllData();
+			m_ui.InputDirEdit->setText(path);
+
+			loadDir();
+		}
 	});
 
 	m_ui.OutputDirEdit->setReadOnly(true);
@@ -94,11 +114,22 @@ upkg::upkg(QWidget *parent)
 		m_ui.OutputDirEdit->setText(path);
 	});
 
+	QObject::connect(m_ui.stopButton, &QPushButton::clicked, [this]() mutable
+	{
+	});
+
+	QObject::connect(this, &upkg::workDir, [this](const QDir& dir)
+	{
+		walkDir(dir);
+	});
+
 	loadDir();
 }
 
 upkg::~upkg()
 {
+	m_abort = true;
+	m_future.waitForFinished();
 	saveSettings();
 }
 
@@ -140,20 +171,43 @@ void upkg::loadDir() noexcept
 	if (inputDir.isEmpty())
 		return;
 
-	walkDir(inputDir);
+	if (m_future.isRunning())
+	{
+		QMessageBox messageBox(QMessageBox::Warning,
+			"任务正在运行", "任务正在运行, 请先停止再执行该操作",
+			QMessageBox::Yes);
+		messageBox.exec();
+		return;
+	}
+
+	m_future = QtConcurrent::run([this, inputDir] { workDir(inputDir); });
+	qDebug() << "waitForFinished";
 }
 
 QFileInfoList upkg::walkDir(const QDir& dir)
 {
 	QFileInfoList fileList = dir.entryInfoList(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
 	QFileInfoList folderList = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+	std::vector<ModelData> mdata;
+	const auto readBufferSize = 512 * 1024;
+	static QByteArray buffer(readBufferSize, 0);
 
 	for (auto& fileinfo : fileList)
 	{
+		if (m_abort)
+			break;
+
 		auto fileName = fileinfo.fileName();
 		auto zipFileName = fileName + ".zip";
+		auto fileSize = fileinfo.size();
 
-		ModelData mdata;
+		ModelData data;
+
+		data.m_fileversion = GetFileVertion(fileinfo.absoluteFilePath());
+		data.m_filesize = QString::number(fileSize);
+		data.m_filename = fileName;
+		data.m_filepath = fileinfo.absoluteFilePath();
+		data.m_file_type = tr("使用zip方式");
 
 		QFile infile(fileinfo.absoluteFilePath());
 		if (infile.open(QIODevice::ReadOnly))
@@ -161,17 +215,29 @@ QFileInfoList upkg::walkDir(const QDir& dir)
 			QCryptographicHash hash(QCryptographicHash::Md5);
 			if (!infile.atEnd())
 			{
-				hash.addData(infile.readAll());
-				mdata.m_md5 = hash.result().toHex();
+				for (; !m_abort;)
+				{
+					auto readBytes = infile.read(buffer.data(), readBufferSize);
+					if (readBytes == 0)
+						break;
+					buffer.resize(readBytes);
+					hash.addData(buffer);
+				}
+
+				data.m_md5 = hash.result().toHex();
 			}
 		}
 
-		mdata.m_fileversion = GetFileVertion(fileinfo.absoluteFilePath());
-		mdata.m_filesize = QString::number(fileinfo.size());
-		mdata.m_filename = fileName;
-		mdata.m_file_type = tr("使用zip方式");
+		mdata.push_back(data);
+	}
 
-		m_datamodel->insertData(mdata);
+	m_datamodel->insertData(mdata);
+
+	for (auto& folder : folderList)
+	{
+		if (m_abort)
+			break;
+		walkDir(folder.absoluteFilePath());
 	}
 
 	return fileList;

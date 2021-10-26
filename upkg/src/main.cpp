@@ -31,6 +31,7 @@ Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin);
 
 #include "upkg/upkg.hpp"
 
+QFont* global_default_font = nullptr;
 
 int main(int argc, char *argv[])
 {
@@ -38,6 +39,18 @@ int main(int argc, char *argv[])
 	QCoreApplication::setApplicationName(QString("Upkg"));
 
 	QApplication a(argc, argv);
+
+#if defined(WIN32)
+ 	std::unique_ptr<QFont> default_font_ptr(new QFont("Consolas", 12));
+ 	global_default_font = default_font_ptr.get();
+	a.setFont(*default_font_ptr);
+#else
+	std::unique_ptr<QFont> default_font_ptr(new QFont());
+	default_font_ptr->setFamily(default_font_ptr->defaultFamily());
+	a.setFont(*default_font_ptr);
+	global_default_font = default_font_ptr.get();
+#endif
+
 	upkg w;
 	w.show();
 

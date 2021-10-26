@@ -12,9 +12,12 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDebug>
+#include <QFuture>
+#include <QtConcurrent>
 
 #include "ui_upkg.h"
 #include "upkg/datamodel.hpp"
+
 
 class upkg : public QMainWindow
 {
@@ -33,8 +36,14 @@ private:
 
 	QFileInfoList walkDir(const QDir& dir);
 
+public:
+signals:
+	void workDir(const QDir&);
+
 private:
 	Ui::upkgClass m_ui;
 	QSettings m_settings;
 	Datamodel* m_datamodel;
+	QFuture<void> m_future;
+	std::atomic_bool m_abort{false};
 };
