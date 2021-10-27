@@ -2,7 +2,9 @@
 
 #include <QDebug>
 #include <QCryptographicHash>
+
 #include "upkg/qcommondelegate.hpp"
+#include "upkg/url_parser.hpp"
 
 #ifdef _MSC_VER
 #	include <windows.h>
@@ -133,6 +135,17 @@ upkg::upkg(QWidget *parent)
 		if (m_scanning_thrd.isRunning())
 		{
 			QMessageBox::warning(this, tr("正在扫描目录"), tr("正在扫描目录, 请先停止或等待扫描完成后再重试!"), QMessageBox::Yes);
+			return;
+		}
+
+		auto urlpath = urlPath.toStdString();
+		try
+		{
+			util::uri url{ urlpath };
+		}
+		catch (const std::exception&)
+		{
+			QMessageBox::warning(this, tr("URL格式错误"), tr("URL格式错误, 请使用正确的Url再重试!"), QMessageBox::Yes);
 			return;
 		}
 	});
