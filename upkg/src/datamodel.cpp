@@ -7,29 +7,35 @@ Datamodel::Datamodel(QObject *parent)
 
 void Datamodel::insertData(const ModelData& data)
 {
+	std::unique_lock lock(m_lock);
 	beginResetModel();
 	m_data.push_back(data);
 	endResetModel();
+	m_data_count = (int)m_data.size();
 }
 
 void Datamodel::insertData(const std::vector<ModelData>& data)
 {
+	std::unique_lock lock(m_lock);
 	beginResetModel();
 	for (const auto& d : data)
 		m_data.push_back(d);
 	endResetModel();
+	m_data_count = (int)m_data.size();
 }
 
 void Datamodel::deleteAllData()
 {
+	std::unique_lock lock(m_lock);
 	beginResetModel();
 	m_data.clear();
 	endResetModel();
+	m_data_count = (int)m_data.size();
 }
 
-int Datamodel::rowCount(const QModelIndex& parent) const
+int Datamodel::rowCount(const QModelIndex&/* parent*/) const
 {
-	return (int)m_data.size();
+	return (int)m_data_count;
 }
 
 int Datamodel::columnCount(const QModelIndex& parent) const
@@ -73,7 +79,10 @@ QVariant Datamodel::headerData(int section, Qt::Orientation orientation, int rol
 QVariant Datamodel::data(const QModelIndex& index, int role /* = Qt::DisplayRole */) const
 {
 	if (role == Qt::DisplayRole)
+	{
+		std::shared_lock lock(m_lock);
 		return columnData(m_data[index.row()], index.column());
+	}
 	return {};
 }
 
@@ -106,10 +115,11 @@ QString Datamodel::columnData(const ModelData& data, int index) const
 
 void Datamodel::sort(int column, Qt::SortOrder order /*= Qt::AscendingOrder*/)
 {
+	const auto asc = order == Qt::AscendingOrder;
+
+	std::unique_lock lock(m_lock);
 	if (m_data.empty())
 		return;
-
-	const auto asc = order == Qt::AscendingOrder;
 
 	std::sort(m_data.begin(), m_data.end(), [column, asc, this](const auto& left, const auto& right)
 	{

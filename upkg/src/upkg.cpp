@@ -98,6 +98,13 @@ upkg::upkg(QWidget *parent)
 		auto oriPath = m_ui.InputDirEdit->text();
 		if (oriPath != path)
 		{
+			if (m_scanning_thrd.isRunning())
+			{
+				m_abort = true;
+				m_scanning_thrd.waitForFinished();
+				assert(!m_abort && "waitForFinished");
+			}
+
 			m_datamodel->deleteAllData();
 			m_ui.InputDirEdit->setText(path);
 
@@ -138,16 +145,17 @@ upkg::upkg(QWidget *parent)
 			return;
 		}
 
-		auto urlpath = urlPath.toStdString();
 		try
 		{
-			util::uri url{ urlpath };
+			util::uri url{ urlPath.toStdString() };
 		}
 		catch (const std::exception&)
 		{
 			QMessageBox::warning(this, tr("URL格式错误"), tr("URL格式错误, 请使用正确的Url再重试!"), QMessageBox::Yes);
 			return;
 		}
+
+
 	});
 
 	QObject::connect(m_ui.stopBtn, &QPushButton::clicked, [this]() mutable

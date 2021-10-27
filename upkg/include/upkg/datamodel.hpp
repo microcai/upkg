@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <shared_mutex>
 
 #include <QVector>
 #include <QAbstractTableModel>
@@ -42,5 +43,7 @@ public:
 	virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
 
 private:
+	mutable std::shared_mutex m_lock;
+	std::atomic_int m_data_count{ 0 };
 	std::vector<ModelData> m_data;
 };
