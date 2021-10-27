@@ -5,6 +5,7 @@
 
 #include "upkg/qcommondelegate.hpp"
 #include "upkg/url_parser.hpp"
+#include "upkg/misc.hpp"
 
 #ifdef _MSC_VER
 #	include <windows.h>
@@ -155,7 +156,7 @@ upkg::upkg(QWidget *parent)
 			return;
 		}
 
-
+		util::compress_zip("D:\\application.log", "d:\\application.log.zip");
 	});
 
 	QObject::connect(m_ui.stopBtn, &QPushButton::clicked, [this]() mutable

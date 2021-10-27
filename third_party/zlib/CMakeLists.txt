@@ -154,6 +154,7 @@ if(MSVC)
 		set(ZLIB_ASMS
 			contrib/masmx64/gvmat64.asm
 			contrib/masmx64/inffasx64.asm
+			contrib/masmx64/inffas8664.c
 		)
 	endif()
 
