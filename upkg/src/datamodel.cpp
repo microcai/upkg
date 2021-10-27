@@ -33,6 +33,12 @@ void Datamodel::deleteAllData()
 	m_data_count = (int)m_data.size();
 }
 
+std::vector<ModelData> Datamodel::allData() const
+{
+	std::shared_lock lock(m_lock);
+	return m_data;
+}
+
 int Datamodel::rowCount(const QModelIndex&/* parent*/) const
 {
 	return (int)m_data_count;

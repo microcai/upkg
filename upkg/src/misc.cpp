@@ -1,6 +1,10 @@
 ﻿#include "upkg/misc.hpp"
-
 #include <boost/filesystem.hpp>
+
+#ifdef _MSC_VER
+#	include <windows.h>
+#	pragma comment(lib, "Version")
+#endif
 
 namespace util {
 
@@ -142,6 +146,77 @@ namespace util {
 		}
 
 		return do_return("unkonw error");
+	}
+
+
+	QString GetFileVertion(QString fullName)
+	{
+		QString result = "0.0.0.0";
+#ifdef WIN32
+		DWORD dwlen = GetFileVersionInfoSizeA(fullName.toStdString().c_str(), 0);
+
+		if (0 == dwlen)
+			return result;
+
+		std::string data;
+		data.resize(dwlen + 1);
+		BOOL bSuccess = GetFileVersionInfoA(fullName.toStdString().c_str(), 0, dwlen, data.data());
+
+		if (false == bSuccess)
+			return result;
+
+		LPVOID lpBuffer = nullptr;
+		UINT uLen = 0;
+		struct LANGANDCODEPAGE
+		{
+			WORD wLanguage;
+			WORD wCodePage;
+		}*lpTranslate;
+
+		bSuccess = VerQueryValue(data.data(), (TEXT("\\VarFileInfo\\Translation")), (LPVOID*)&lpTranslate, &uLen);
+		if (false == bSuccess)
+			return result;
+
+		QString str1, str2;
+		str1.setNum(lpTranslate->wLanguage, 16);
+		str2.setNum(lpTranslate->wCodePage, 16);
+		str1 = "000" + str1;
+		str2 = "000" + str2;
+		QString verPath = "\\StringFileInfo\\" + str1.right(4) + str2.right(4) + "\\FileVersion";
+		bSuccess = VerQueryValueA(data.data(), (verPath.toStdString().c_str()), &lpBuffer, &uLen);
+		if (false == bSuccess)
+			return result;
+
+		result = QString::fromLocal8Bit((char*)lpBuffer);
+#endif
+		return result;
+	}
+
+	QString md5sum(const QString& path, std::atomic_bool& abort)
+	{
+		const auto readBufferSize = 512 * 1024;
+		static QByteArray buffer(readBufferSize, 0);
+
+		QFile infile{ path };
+		if (infile.open(QIODevice::ReadOnly))
+		{
+			QCryptographicHash hash(QCryptographicHash::Md5);
+			if (!infile.atEnd())
+			{
+				for (; !abort;)
+				{
+					auto readBytes = infile.read(buffer.data(), readBufferSize);
+					if (readBytes == 0)
+						break;
+					buffer.resize(readBytes);
+					hash.addData(buffer);
+				}
+
+				return hash.result().toHex();
+			}
+		}
+
+		return {};
 	}
 
 }

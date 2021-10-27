@@ -7,55 +7,7 @@
 #include "upkg/url_parser.hpp"
 #include "upkg/misc.hpp"
 
-#ifdef _MSC_VER
-#	include <windows.h>
-#	pragma comment(lib, "Version")
-#endif
-
 extern QFont* global_default_font;
-
-QString GetFileVertion(QString fullName)
-{
-	QString result = "0.0.0.0";
-#ifdef WIN32
-	DWORD dwlen = GetFileVersionInfoSizeA(fullName.toStdString().c_str(), 0);
-
-	if (0 == dwlen)
-		return result;
-
-	std::string data;
-	data.resize(dwlen + 1);
-	BOOL bSuccess = GetFileVersionInfoA(fullName.toStdString().c_str(), 0, dwlen, data.data());
-
-	if (false == bSuccess)
-		return result;
-
-	LPVOID lpBuffer = nullptr;
-	UINT uLen = 0;
-	struct LANGANDCODEPAGE
-	{
-		WORD wLanguage;
-		WORD wCodePage;
-	}* lpTranslate;
-
-	bSuccess = VerQueryValue(data.data(), (TEXT("\\VarFileInfo\\Translation")), (LPVOID*)&lpTranslate, &uLen);
-	if (false == bSuccess)
-		return result;
-
-	QString str1, str2;
-	str1.setNum(lpTranslate->wLanguage, 16);
-	str2.setNum(lpTranslate->wCodePage, 16);
-	str1 = "000" + str1;
-	str2 = "000" + str2;
-	QString verPath = "\\StringFileInfo\\" + str1.right(4) + str2.right(4) + "\\FileVersion";
-	bSuccess = VerQueryValueA(data.data(), (verPath.toStdString().c_str()), &lpBuffer, &uLen);
-	if (false == bSuccess)
-		return result;
-
-	result = QString::fromLocal8Bit((char*)lpBuffer);
-#endif
-	return result;
-}
 
 upkg::upkg(QWidget *parent)
 	: QMainWindow(parent)
@@ -156,7 +108,24 @@ upkg::upkg(QWidget *parent)
 			return;
 		}
 
-		util::compress_zip("D:\\application.log", "d:\\application.log.zip");
+		QDir dir1(inputDir);
+		QDir dir2(outputDir);
+
+		auto data = m_datamodel->allData();
+		for (auto& d : data)
+		{
+			QDir dir(d.m_filepath);
+			d.m_zipfilepath = dir.absolutePath().replace(dir1.absolutePath(), dir2.absolutePath()) + tr(".zip");
+			auto mdir = std::filesystem::path(d.m_zipfilepath.toStdWString()).parent_path();
+			std::error_code ignore_ec;
+			std::filesystem::create_directories(mdir, ignore_ec);
+			util::compress_zip(d.m_filepath.toLocal8Bit().data(), d.m_zipfilepath.toLocal8Bit().data());
+			d.m_zipmd5 = util::md5sum(d.m_zipfilepath, m_abort);;
+		}
+
+		// 替换数据.
+		m_datamodel->deleteAllData();
+		m_datamodel->insertData(data);
 	});
 
 	QObject::connect(m_ui.stopBtn, &QPushButton::clicked, [this]() mutable
@@ -273,31 +242,12 @@ QFileInfoList upkg::walkDir(const QDir& dir)
 
 		ModelData data;
 
-		data.m_fileversion = GetFileVertion(fileinfo.absoluteFilePath());
+		data.m_fileversion = util::GetFileVertion(fileinfo.absoluteFilePath());
 		data.m_filesize = QString::number(fileSize);
 		data.m_filename = fileName;
 		data.m_filepath = fileinfo.absoluteFilePath();
 		data.m_file_type = tr("使用zip方式");
-
-		QFile infile(fileinfo.absoluteFilePath());
-		if (infile.open(QIODevice::ReadOnly))
-		{
-			QCryptographicHash hash(QCryptographicHash::Md5);
-			if (!infile.atEnd())
-			{
-				for (; !m_abort;)
-				{
-					auto readBytes = infile.read(buffer.data(), readBufferSize);
-					if (readBytes == 0)
-						break;
-					buffer.resize(readBytes);
-					hash.addData(buffer);
-				}
-
-				data.m_md5 = hash.result().toHex();
-			}
-		}
-
+		data.m_md5 = util::md5sum(fileinfo.absoluteFilePath(), m_abort);
 		m_datamodel->insertData(data);
 	}
 

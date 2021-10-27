@@ -14,6 +14,7 @@ struct ModelData
 	QString m_fileversion;
 	QString m_md5;
 	QString m_zipmd5;
+	QString m_zipfilepath;
 	QString m_filesize;
 	QString m_zipfilesize;
 	QString m_file_type;
@@ -31,6 +32,8 @@ public:
 	void insertData(const ModelData& data);
 	void insertData(const std::vector<ModelData>& data);
 	void deleteAllData();
+
+	std::vector<ModelData> allData() const;
 
 	int rowCount(const QModelIndex& parent) const;
 	int columnCount(const QModelIndex& parent) const;
