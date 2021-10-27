@@ -55,6 +55,7 @@ set(upkg_SRCS
 
 	include/upkg/upkg.hpp
 	include/upkg/datamodel.hpp
+	include/upkg/qcommondelegate.hpp
 
 	src/main.cpp
 	src/upkg.cpp

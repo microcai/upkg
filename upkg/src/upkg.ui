@@ -111,7 +111,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="stopButton">
+         <widget class="QPushButton" name="stopBtn">
           <property name="text">
            <string>停止工作</string>
           </property>
@@ -122,7 +122,11 @@
      </layout>
     </item>
     <item row="1" column="0">
-     <widget class="QTableView" name="fileListView"/>
+     <widget class="QTableView" name="fileListView">
+      <property name="showGrid">
+       <bool>true</bool>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

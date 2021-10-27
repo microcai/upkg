@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <QCryptographicHash>
+#include "upkg/qcommondelegate.hpp"
 
 #ifdef _MSC_VER
 #	include <windows.h>
@@ -66,9 +67,6 @@ upkg::upkg(QWidget *parent)
 	m_ui.fileListView->setSelectionMode(QAbstractItemView::SingleSelection);
 	m_ui.fileListView->horizontalHeader()->setDisabled(false);
 
-	for (int c = 0; c < m_ui.fileListView->horizontalHeader()->count(); ++c)
-		m_ui.fileListView->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
-
 	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
 	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Interactive);
 	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Interactive);
@@ -84,13 +82,17 @@ upkg::upkg(QWidget *parent)
 	m_ui.fileListView->setColumnWidth(3, columnWidth);
 
 	m_ui.fileListView->horizontalHeader()->setStretchLastSection(true);
+	m_ui.fileListView->setSortingEnabled(true);
 
 	m_ui.fileListView->show();
+	m_ui.fileListView->setItemDelegate(new QCommonDelegate(m_ui.fileListView));
 
 	m_ui.InputDirEdit->setReadOnly(true);
 	QObject::connect(m_ui.InputDirBtn, &QPushButton::clicked, [this]() mutable
 	{
 		QString path = QDir::toNativeSeparators(QFileDialog::getExistingDirectory(this, tr("请选择源目录"), QDir::currentPath()));
+		if (path.isEmpty())
+			return;
 		auto oriPath = m_ui.InputDirEdit->text();
 		if (oriPath != path)
 		{
@@ -105,16 +107,45 @@ upkg::upkg(QWidget *parent)
 	QObject::connect(m_ui.OutputDirBtn, &QPushButton::clicked, [this]() mutable
 	{
 		QString path = QDir::toNativeSeparators(QFileDialog::getExistingDirectory(this, tr("请选择存放目录"), QDir::currentPath()));
+		if (path.isEmpty())
+			return;
+		if (QDir(path).entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries).count() != 0)
+		{
+			QMessageBox::information(this, tr("目录不为空"), tr("目录不为空，请使用一个空目录用来保存生成的更新文件!"), QMessageBox::Yes);
+			return;
+		}
 		m_ui.OutputDirEdit->setText(path);
 	});
 
-	QObject::connect(m_ui.stopButton, &QPushButton::clicked, [this]() mutable
+	QObject::connect(m_ui.startBtn, &QPushButton::clicked, [this]() mutable
 	{
+		auto inputDir = m_ui.InputDirEdit->text();
+		auto outputDir = m_ui.OutputDirEdit->text();
+		auto urlPath = m_ui.UrlEdit->text();
+		auto xmlFileName = m_ui.XmlEdit->text();
+
+		if (inputDir.isEmpty() || outputDir.isEmpty() || urlPath.isEmpty() || xmlFileName.isEmpty())
+		{
+			QMessageBox::information(this, tr("参数缺失"), tr("参数设置错误, 请检查参数设置!"), QMessageBox::Yes);
+			return;
+		}
+
+		if (m_scanning_thrd.isRunning())
+		{
+			QMessageBox::warning(this, tr("正在扫描目录"), tr("正在扫描目录, 请先停止或等待扫描完成后再重试!"), QMessageBox::Yes);
+			return;
+		}
+	});
+
+	QObject::connect(m_ui.stopBtn, &QPushButton::clicked, [this]() mutable
+	{
+		m_abort = true;
 	});
 
 	QObject::connect(this, &upkg::workDir, [this](const QDir& dir) mutable
 	{
 		walkDir(dir);
+		m_abort = false;
 	});
 
 	QObject::connect(this, &upkg::scanDir, this, [this]() mutable
@@ -129,7 +160,7 @@ upkg::upkg(QWidget *parent)
 upkg::~upkg()
 {
 	m_abort = true;
-	m_future.waitForFinished();
+	m_scanning_thrd.waitForFinished();
 	saveSettings();
 }
 
@@ -154,13 +185,13 @@ void upkg::loadSettings() noexcept
 	if (m_settings.contains("State"))
 		restoreState(m_settings.value("State").toByteArray());
 
-	for (int c = 0; c < m_ui.fileListView->horizontalHeader()->count(); ++c)
+	for (int i = 0; i < m_ui.fileListView->horizontalHeader()->count(); ++i)
 	{
-		auto columnName = "Columns" + QString::number(c);
+		auto columnName = "Columns" + QString::number(i);
 		if (m_settings.contains(columnName))
 		{
 			auto column = m_settings.value(columnName).toInt();
-			m_ui.fileListView->setColumnWidth(c, column);
+			m_ui.fileListView->setColumnWidth(i, column);
 		}
 	}
 }
@@ -172,10 +203,10 @@ void upkg::saveSettings() noexcept
 	auto urlPath = m_ui.UrlEdit->text();
 	auto xmlFileName = m_ui.XmlEdit->text();
 
-	for (int c = 0; c < m_ui.fileListView->horizontalHeader()->count(); ++c)
+	for (int i = 0; i < m_ui.fileListView->horizontalHeader()->count(); ++i)
 	{
-		auto column = m_ui.fileListView->columnWidth(c);
-		m_settings.setValue("Columns" + QString::number(c), column);
+		auto column = m_ui.fileListView->columnWidth(i);
+		m_settings.setValue("Columns" + QString::number(i), column);
 	}
 
 	m_settings.setValue("InputDir", inputDir);
@@ -185,7 +216,6 @@ void upkg::saveSettings() noexcept
 	m_settings.setValue("WinSize", size());
 	m_settings.setValue("State", saveState());
 	m_settings.setValue("Geometry", saveGeometry());
-
 }
 
 void upkg::loadDir() noexcept
@@ -194,23 +224,19 @@ void upkg::loadDir() noexcept
 	if (inputDir.isEmpty())
 		return;
 
-	if (m_future.isRunning())
+	if (m_scanning_thrd.isRunning())
 	{
-		QMessageBox messageBox(QMessageBox::Warning,
-			"任务正在运行", "任务正在运行, 请先停止再执行该操作",
-			QMessageBox::Yes);
-		messageBox.exec();
+		QMessageBox::warning(this, tr("正在扫描目录"), tr("正在扫描目录, 请先停止或等待扫描完成后再重试!"), QMessageBox::Yes);
 		return;
 	}
 
-	m_future = QtConcurrent::run([this, inputDir] { workDir(inputDir); });
+	m_scanning_thrd = QtConcurrent::run([this, inputDir] { workDir(inputDir); });
 }
 
 QFileInfoList upkg::walkDir(const QDir& dir)
 {
 	QFileInfoList fileList = dir.entryInfoList(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
 	QFileInfoList folderList = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
-	std::vector<ModelData> mdata;
 	const auto readBufferSize = 512 * 1024;
 	static QByteArray buffer(readBufferSize, 0);
 
@@ -250,10 +276,8 @@ QFileInfoList upkg::walkDir(const QDir& dir)
 			}
 		}
 
-		mdata.push_back(data);
+		m_datamodel->insertData(data);
 	}
-
-	m_datamodel->insertData(mdata);
 
 	for (auto& folder : folderList)
 	{

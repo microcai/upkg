@@ -14,6 +14,7 @@
 #include <QDebug>
 #include <QFuture>
 #include <QtConcurrent>
+#include <QStyledItemDelegate>
 
 #include "ui_upkg.h"
 #include "upkg/datamodel.hpp"
@@ -45,6 +46,6 @@ private:
 	Ui::upkgClass m_ui;
 	QSettings m_settings;
 	Datamodel* m_datamodel;
-	QFuture<void> m_future;
-	std::atomic_bool m_abort{false};
+	QFuture<void> m_scanning_thrd;
+	std::atomic_bool m_abort{ false };
 };
