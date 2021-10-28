@@ -182,7 +182,13 @@ upkg::upkg(QWidget *parent)
 
 	QObject::connect(this, &upkg::initWork, this, [this]() mutable
 	{
-		loadSettings();
+		static bool init = true;
+		if (init)
+		{
+			init = false;
+			loadSettings();
+		}
+
 		loadDir();
 	}, Qt::QueuedConnection);
 
