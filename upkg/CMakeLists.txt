@@ -63,15 +63,17 @@ set(upkg_SRCS
 	src/upkg.cpp
 	src/misc.cpp
 	src/datamodel.cpp
-
 	src/upkg.rc
 )
+
+qt6_add_resources(RC_SRCS src/res.qrc)
+
 
 if (WIN32)
 	link_libraries(version.lib)
 endif()
 
 add_executable(upkg WIN32
-	${upkg_SRCS}
+	${upkg_SRCS} ${RC_SRCS}
 )
 

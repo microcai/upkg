@@ -39,6 +39,8 @@ int main(int argc, char *argv[])
 
 	QApplication a(argc, argv);
 
+    QApplication::setWindowIcon(QIcon(":///upkg.ico"));
+
 #if defined(WIN32)
  	std::unique_ptr<QFont> default_font_ptr(new QFont("Consolas", 12));
  	globalDefaultFont = default_font_ptr.get();
