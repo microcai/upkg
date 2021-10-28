@@ -6,6 +6,8 @@
 
 #include <QVector>
 #include <QAbstractTableModel>
+#include <QProgressBar>
+#include <QDir>
 
 struct ModelData
 {
@@ -33,7 +35,11 @@ public:
 	void insertData(const std::vector<ModelData>& data);
 	void deleteAllData();
 
-	std::vector<ModelData> allData() const;
+	void work(const QString& url,
+		const QDir& inputDir, const QDir& outputDir,
+		const QString& xmlFileName,
+		QProgressBar* progressBar,
+		std::atomic_bool& abort);
 
 	int rowCount(const QModelIndex& parent) const;
 	int columnCount(const QModelIndex& parent) const;
@@ -44,6 +50,9 @@ public:
 	virtual QVariant data(const QModelIndex& index, int role /* = Qt::DisplayRole */) const override;
 
 	virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+
+private:
+	void updateData(const ModelData& data);
 
 private:
 	mutable std::shared_mutex m_lock;

@@ -15,6 +15,7 @@
 #include <QFuture>
 #include <QtConcurrent>
 #include <QStyledItemDelegate>
+#include <QProgressBar>
 
 #include "ui_upkg.h"
 #include "upkg/datamodel.hpp"
@@ -39,13 +40,18 @@ private:
 
 public:
 signals:
-	void workDir(const QDir&);
-	void scanDir();
+	void scanDir(QDir);
+	void initWork();
+	void workDir();
+	void workProgress(int value);
 
 private:
 	Ui::upkgClass m_ui;
 	QSettings m_settings;
 	Datamodel* m_datamodel;
+	QProgressBar* m_progressBar;
+	QLabel* m_statusLable;
 	QFuture<void> m_scanning_thrd;
+	QFuture<void> m_working_thrd;
 	std::atomic_bool m_abort{ false };
 };

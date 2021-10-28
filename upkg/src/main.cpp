@@ -24,14 +24,13 @@ Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin);
 #include <QCoreApplication>
 #include <QFile>
 
-#include <thread>
-
 #include <boost/regex.hpp>
 #include <boost/asio/io_context.hpp>
 
 #include "upkg/upkg.hpp"
 
 QFont* global_default_font = nullptr;
+upkg* mainWindow = nullptr;
 
 int main(int argc, char *argv[])
 {

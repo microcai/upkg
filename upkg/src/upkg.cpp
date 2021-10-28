@@ -7,12 +7,19 @@
 #include "upkg/url_parser.hpp"
 #include "upkg/misc.hpp"
 
+#ifdef WIN32
+#include <Windows.h>
+#include <shellapi.h>
+#endif // WIN32
+
 extern QFont* global_default_font;
+extern upkg* mainWindow;
 
 upkg::upkg(QWidget *parent)
 	: QMainWindow(parent)
 	, m_settings(QSettings::NativeFormat, QSettings::UserScope, QCoreApplication::organizationName(), QCoreApplication::applicationName())
 {
+	mainWindow = this;
 	m_ui.setupUi(this);
 
 	m_datamodel = new Datamodel(m_ui.fileListView);
@@ -29,7 +36,6 @@ upkg::upkg(QWidget *parent)
 	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(4, QHeaderView::Interactive);
 	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(5, QHeaderView::Interactive);
 	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(6, QHeaderView::Interactive);
-	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(7, QHeaderView::Interactive);
 
 	QFontMetrics fm(*global_default_font);
 	auto columnWidth = fm.horizontalAdvance(QString("b0baee9d279d34fa1dfd71aadb908c3f")) + 7;	// 7 column line width.
@@ -41,6 +47,19 @@ upkg::upkg(QWidget *parent)
 
 	m_ui.fileListView->show();
 	m_ui.fileListView->setItemDelegate(new QCommonDelegate(m_ui.fileListView));
+
+	m_progressBar = new QProgressBar(m_ui.statusbar);
+	m_progressBar->setAlignment(Qt::AlignRight);
+	m_progressBar->setMaximumSize(800, fm.height());
+	m_statusLable = new QLabel(m_ui.statusbar);
+	m_statusLable->setText(tr("准备就绪"));
+	m_statusLable->setAlignment(Qt::AlignLeft);
+	m_ui.statusbar->addWidget(m_statusLable);
+	m_ui.statusbar->addWidget(m_progressBar);
+
+	QObject::connect(this, &upkg::workProgress, this, [this](int value) {
+ 		m_progressBar->setValue(value);
+ 	}, Qt::QueuedConnection);
 
 	m_ui.InputDirEdit->setReadOnly(true);
 	QObject::connect(m_ui.InputDirBtn, &QPushButton::clicked, [this]() mutable
@@ -108,24 +127,27 @@ upkg::upkg(QWidget *parent)
 			return;
 		}
 
-		QDir dir1(inputDir);
-		QDir dir2(outputDir);
-
-		auto data = m_datamodel->allData();
-		for (auto& d : data)
+		if (m_working_thrd.isRunning())
 		{
-			QDir dir(d.m_filepath);
-			d.m_zipfilepath = dir.absolutePath().replace(dir1.absolutePath(), dir2.absolutePath()) + tr(".zip");
-			auto mdir = std::filesystem::path(d.m_zipfilepath.toStdWString()).parent_path();
-			std::error_code ignore_ec;
-			std::filesystem::create_directories(mdir, ignore_ec);
-			util::compress_zip(d.m_filepath.toLocal8Bit().data(), d.m_zipfilepath.toLocal8Bit().data());
-			d.m_zipmd5 = util::md5sum(d.m_zipfilepath, m_abort);;
+			QMessageBox::warning(this, tr("正在打包目录"), tr("正在打包目录, 请先停止或等待打包完成后再重试!"), QMessageBox::Yes);
+			return;
 		}
 
-		// 替换数据.
+		m_progressBar->setMaximum(m_datamodel->rowCount({}));
+		m_progressBar->setMinimum(0);
+
+		m_working_thrd = QtConcurrent::run([this] { workDir(); });
+	});
+
+	QObject::connect(m_ui.refreshBtn, &QPushButton::clicked, [this]() mutable
+	{
 		m_datamodel->deleteAllData();
-		m_datamodel->insertData(data);
+		Q_EMIT this->initWork();
+	});
+
+	QObject::connect(m_ui.clsBtn, &QPushButton::clicked, [this]() mutable
+	{
+		m_datamodel->deleteAllData();
 	});
 
 	QObject::connect(m_ui.stopBtn, &QPushButton::clicked, [this]() mutable
@@ -133,25 +155,45 @@ upkg::upkg(QWidget *parent)
 		m_abort = true;
 	});
 
-	QObject::connect(this, &upkg::workDir, [this](const QDir& dir) mutable
+	QObject::connect(this, &upkg::scanDir, [this](QDir dir) mutable
 	{
 		walkDir(dir);
+		m_statusLable->setText(tr("扫描目录完成"));
 		m_abort = false;
 	});
 
-	QObject::connect(this, &upkg::scanDir, this, [this]() mutable
+	QObject::connect(this, &upkg::workDir, [this]() mutable
+	{
+		auto inputDir = QDir(m_ui.InputDirEdit->text());
+		auto outputDir = QDir(m_ui.OutputDirEdit->text());
+		auto url = m_ui.UrlEdit->text();
+		auto xmlFileName = m_ui.XmlEdit->text();
+
+		m_datamodel->work(url, inputDir, outputDir, xmlFileName, m_progressBar, m_abort);
+
+		m_statusLable->setText(tr("完成"));
+		m_abort = false;
+
+#ifdef WIN32
+		auto dir = QDir::toNativeSeparators(outputDir.absolutePath());
+		ShellExecuteA(NULL, "open", "explorer.exe", dir.toLocal8Bit().data(), "", SW_SHOW);
+#endif
+	});
+
+	QObject::connect(this, &upkg::initWork, this, [this]() mutable
 	{
 		loadSettings();
 		loadDir();
 	}, Qt::QueuedConnection);
 
-	Q_EMIT this->scanDir();
+	Q_EMIT this->initWork();
 }
 
 upkg::~upkg()
 {
 	m_abort = true;
 	m_scanning_thrd.waitForFinished();
+	m_working_thrd.waitForFinished();
 	saveSettings();
 }
 
@@ -221,7 +263,9 @@ void upkg::loadDir() noexcept
 		return;
 	}
 
-	m_scanning_thrd = QtConcurrent::run([this, inputDir] { workDir(inputDir); });
+	m_statusLable->setText(tr("正在扫描目录..."));
+
+	m_scanning_thrd = QtConcurrent::run([this, inputDir] { scanDir(inputDir); });
 }
 
 QFileInfoList upkg::walkDir(const QDir& dir)
@@ -246,7 +290,7 @@ QFileInfoList upkg::walkDir(const QDir& dir)
 		data.m_filesize = QString::number(fileSize);
 		data.m_filename = fileName;
 		data.m_filepath = fileinfo.absoluteFilePath();
-		data.m_file_type = tr("使用zip方式");
+		data.m_file_type = tr("zip");
 		data.m_md5 = util::md5sum(fileinfo.absoluteFilePath(), m_abort);
 		m_datamodel->insertData(data);
 	}
