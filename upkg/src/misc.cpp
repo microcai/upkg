@@ -1,10 +1,16 @@
 ﻿#include "upkg/misc.hpp"
+#include "fmt/chrono.h"
+
+#include <sys/stat.h>
+
+#include <ctime>
 #include <boost/filesystem.hpp>
 
 #ifdef _MSC_VER
 #	include <windows.h>
 #	pragma comment(lib, "Version")
 #endif
+
 
 namespace util {
 
@@ -82,6 +88,59 @@ namespace util {
 		void* buf = (void*)malloc(size_buf);
 		const char* password = NULL;
 		FILE* fin = NULL;
+
+#ifdef WIN32
+		struct _stat s = { 0 };
+		_stat(inFile, &s);
+#elif __linux__
+		struct stat s = { 0 };
+		stat(inFile, &s);
+
+		zi.external_fa = (s.st_mode << 16) | !(s.st_mode & S_IWRITE);
+
+#define MSDOS_DIR_ATTR 0x10
+#define UNX_IFDIR      0040000     /* Unix directory */
+#define UNX_IFREG      0100000     /* Unix regular file */
+#define UNX_IFSOCK     0140000     /* Unix socket (BSD, not SysV or Amiga) */
+#define UNX_IFLNK      0120000     /* Unix symbolic link (not SysV, Amiga) */
+#define UNX_IFBLK      0060000     /* Unix block special       (not Amiga) */
+#define UNX_IFCHR      0020000     /* Unix character special   (not Amiga) */
+#define UNX_IFIFO      0010000     /* Unix fifo    (BCC, not MSC or Amiga) */
+
+		auto legacy_modes = s.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO | S_ISUID | S_ISGID | S_ISVTX);
+		if (S_ISDIR(s.st_mode))
+			legacy_modes |= UNX_IFDIR;
+		if (S_ISREG(s.st_mode))
+			legacy_modes |= UNX_IFREG;
+		if (S_ISLNK(s.st_mode))
+			legacy_modes |= UNX_IFLNK;
+		if (S_ISBLK(s.st_mode))
+			legacy_modes |= UNX_IFBLK;
+		if (S_ISCHR(s.st_mode))
+			legacy_modes |= UNX_IFCHR;
+		if (S_ISFIFO(s.st_mode))
+			legacy_modes |= UNX_IFIFO;
+		if (S_ISSOCK(s.st_mode))
+			legacy_modes |= UNX_IFSOCK;
+		zi.external_fa = (legacy_modes << 16) | !(s.st_mode & S_IWRITE);
+
+		if ((s.st_mode & S_IFMT) == S_IFDIR) {
+			zi.external_fa |= MSDOS_DIR_ATTR;
+		}
+
+#endif
+
+		auto timeinfo = fmt::localtime(s.st_mtime);
+		zi.tmz_date.tm_year = timeinfo.tm_year;
+		zi.tmz_date.tm_mon = timeinfo.tm_mon;
+		zi.tmz_date.tm_mday = timeinfo.tm_mday;
+		zi.tmz_date.tm_hour = timeinfo.tm_hour;
+		zi.tmz_date.tm_min = timeinfo.tm_min;
+		zi.tmz_date.tm_sec = timeinfo.tm_sec;
+
+#ifdef WIN32
+		zi.external_fa = ::GetFileAttributesA(inFile);
+#endif
 
 		err = zipOpenNewFileInZip3(zf, szFname.c_str(), &zi,
 			NULL, 0, NULL, 0, NULL /* comment*/,
