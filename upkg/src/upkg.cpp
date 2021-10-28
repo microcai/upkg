@@ -176,7 +176,7 @@ upkg::upkg(QWidget *parent)
 
 #ifdef WIN32
 		auto dir = QDir::toNativeSeparators(outputDir.absolutePath());
-		ShellExecuteA(NULL, "open", "explorer.exe", dir.toLocal8Bit().data(), "", SW_SHOW);
+		ShellExecuteW(NULL, L"open", L"explorer.exe", dir.toStdWString().c_str(), L"", SW_SHOW);
 #endif
 	});
 
