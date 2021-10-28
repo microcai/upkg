@@ -105,7 +105,7 @@ upkg::upkg(QWidget *parent)
 		auto urlPath = m_ui.UrlEdit->text();
 		auto xmlFileName = m_ui.XmlEdit->text();
 
-		if (inputDir.isEmpty() || outputDir.isEmpty() || urlPath.isEmpty() || xmlFileName.isEmpty())
+		if (inputDir.isEmpty() || outputDir.isEmpty() || xmlFileName.isEmpty())
 		{
 			QMessageBox::information(this, tr("参数缺失"), tr("参数设置错误, 请检查参数设置!"), QMessageBox::Yes);
 			return;
@@ -114,16 +114,6 @@ upkg::upkg(QWidget *parent)
 		if (m_scanning_thrd.isRunning())
 		{
 			QMessageBox::warning(this, tr("正在扫描目录"), tr("正在扫描目录, 请先停止或等待扫描完成后再重试!"), QMessageBox::Yes);
-			return;
-		}
-
-		try
-		{
-			util::uri url{ urlPath.toStdString() };
-		}
-		catch (const std::exception&)
-		{
-			QMessageBox::warning(this, tr("URL格式错误"), tr("URL格式错误, 请使用正确的Url再重试!"), QMessageBox::Yes);
 			return;
 		}
 
