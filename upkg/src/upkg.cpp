@@ -12,7 +12,7 @@
 #include <shellapi.h>
 #endif // WIN32
 
-extern QFont* global_default_font;
+extern QFont* globalDefaultFont;
 extern upkg* mainWindow;
 
 upkg::upkg(QWidget *parent)
@@ -37,7 +37,7 @@ upkg::upkg(QWidget *parent)
 	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(5, QHeaderView::Interactive);
 	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(6, QHeaderView::Interactive);
 
-	QFontMetrics fm(*global_default_font);
+	QFontMetrics fm(*globalDefaultFont);
 	auto columnWidth = fm.horizontalAdvance(QString("b0baee9d279d34fa1dfd71aadb908c3f")) + 7;	// 7 column line width.
 	m_ui.fileListView->setColumnWidth(2, columnWidth);
 	m_ui.fileListView->setColumnWidth(3, columnWidth);
