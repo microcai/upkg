@@ -5,10 +5,10 @@
 #include <atomic>
 
 #include <QString>
-#include <Qfile>
+#include <QFile>
 #include <QCryptographicHash>
 
-#include "zip.h"
+#include "minizip/zip.h"
 
 namespace util {
 	std::tuple<bool, std::string> compress_gz(const char* inFile, const char* outFile);

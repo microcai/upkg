@@ -22,7 +22,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}" "${PROJECT_SO
 
 option(ENABLE_BUILD_WERROR "all warnings being treated as errors" ON)
 option(ENABLE_SYSTEM_OPENSSL "link to system openssl" OFF)
-option(ENABLE_SYSTEM_ZLIB "Build with system zlib support" OFF)
 option(ENABLE_USE_GIT_VERSION "use git version" OFF)
 
 option(ENABLE_LLD "enable lld linker" OFF)
@@ -96,14 +95,15 @@ add_definitions(-DBOOST_COROUTINES_NO_DEPRECATION_WARNING)
 add_subdirectory(third_party/boost)
 
 # add zip
-if (WIN32 OR NOT ENABLE_SYSTEM_ZLIB)
+if (WIN32)
 	add_subdirectory(third_party/zlib EXCLUDE_FROM_ALL)
 	set(ZLIB_LIBRARIES zlibstatic)
 	set(MINIZIP_LIBRARIES minizip)
 	set(ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/zlib ${CMAKE_CURRENT_SOURCE_DIR}/third_party/zlib/contrib/minizip)
 else()
 	find_package(ZLIB REQUIRED)
-	find_package(minizip REQUIRED)
+	set(MINIZIP_LIBRARIES minizip)
+#	find_package(minizip REQUIRED)
 endif()
 
 # add tinyxml2
