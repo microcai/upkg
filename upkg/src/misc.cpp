@@ -149,6 +149,7 @@ namespace util {
 		zi.tmz_date.tm_sec = timeinfo.tm_sec;
 
 		uint8_t* field = nullptr;
+		uInt extra_field_size = 0;
 #ifdef WIN32
 		zi.external_fa = ::GetFileAttributesA(inFile);
 
@@ -173,7 +174,7 @@ namespace util {
 		*(__time64_t*)field = s.st_ctime;		// CrTime
 		field += sizeof(__time64_t);
 
-		auto extra_field_size = field - extra_field.data();
+		extra_field_size = field - extra_field.data();
 		field = extra_field.data();
 #endif
 
