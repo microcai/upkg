@@ -11,8 +11,19 @@
 #	pragma comment(lib, "Version")
 #endif
 
-
 namespace util {
+
+	inline uLong tm2dosdate(const tm_zip* ptm)
+	{
+		uLong year = (uLong)ptm->tm_year;
+		if (year >= 1980)
+			year -= 1980;
+		else if (year >= 80)
+			year -= 80;
+		return
+			(uLong)(((ptm->tm_mday) + (32 * (ptm->tm_mon + 1)) + (512 * year)) << 16) |
+			((ptm->tm_sec / 2) + (32 * ptm->tm_min) + (2048 * (uLong)ptm->tm_hour));
+	}
 
 	std::tuple<bool, std::string> compress_gz(const char* inFile, const char* outFile)
 	{
@@ -129,7 +140,6 @@ namespace util {
 		}
 
 #endif
-
 		auto timeinfo = fmt::localtime(s.st_mtime);
 		zi.tmz_date.tm_year = timeinfo.tm_year;
 		zi.tmz_date.tm_mon = timeinfo.tm_mon;
@@ -138,12 +148,37 @@ namespace util {
 		zi.tmz_date.tm_min = timeinfo.tm_min;
 		zi.tmz_date.tm_sec = timeinfo.tm_sec;
 
+		uint8_t* field = nullptr;
 #ifdef WIN32
 		zi.external_fa = ::GetFileAttributesA(inFile);
+
+		std::vector<uint8_t> extra_field(128, 0);
+		field = extra_field.data();
+		*field++ = 0x0a;// 0x55  0x0a
+		*field++ = 0x0; // 0x54  0x00
+		*field++ = 32;	// size
+		*field++ = 0;	// size
+
+		field += 4;	// Reserved
+		*field++ = 1;	// 0x01
+		*field++ = 0;	// 0x00
+
+		*field++ = 24;	// size
+		*field++ = 0;	// size
+
+		*(__time64_t*)field = s.st_mtime;		// ModTime
+		field += sizeof(__time64_t);
+		*(__time64_t*)field = s.st_atime;		// AcTime
+		field += sizeof(__time64_t);
+		*(__time64_t*)field = s.st_ctime;		// CrTime
+		field += sizeof(__time64_t);
+
+		auto extra_field_size = field - extra_field.data();
+		field = extra_field.data();
 #endif
 
 		err = zipOpenNewFileInZip3(zf, szFname.c_str(), &zi,
-			NULL, 0, NULL, 0, NULL /* comment*/,
+			nullptr, 0, field, extra_field_size, NULL /* comment*/,
 			Z_DEFLATED,
 			Z_DEFAULT_COMPRESSION, 0,
 			/* -MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY, */
