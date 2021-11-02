@@ -138,8 +138,8 @@ namespace util {
 		if ((s.st_mode & S_IFMT) == S_IFDIR) {
 			zi.external_fa |= MSDOS_DIR_ATTR;
 		}
+#endif // __linux__ / WIN32
 
-#endif
 		auto timeinfo = fmt::localtime(s.st_mtime);
 		zi.tmz_date.tm_year = timeinfo.tm_year;
 		zi.tmz_date.tm_mon = timeinfo.tm_mon;
@@ -148,38 +148,64 @@ namespace util {
 		zi.tmz_date.tm_min = timeinfo.tm_min;
 		zi.tmz_date.tm_sec = timeinfo.tm_sec;
 
-		uint8_t* field = nullptr;
+		uint8_t* extra_field = nullptr;
 		uInt extra_field_size = 0;
+
 #ifdef WIN32
 		zi.external_fa = ::GetFileAttributesA(inFile);
 
-		std::vector<uint8_t> extra_field(128, 0);
-		field = extra_field.data();
-		*field++ = 0x0a;// 0x55  0x0a
-		*field++ = 0x0; // 0x54  0x00
-		*field++ = 32;	// size
-		*field++ = 0;	// size
+		std::vector<uint8_t> extra_buffer(256, 0);
+		extra_field = extra_buffer.data();
+		*extra_field++ = 0x0a;// 0x55  0x0a
+		*extra_field++ = 0x0; // 0x54  0x00
+		*extra_field++ = 32;	// size
+		*extra_field++ = 0;	// size
 
-		field += 4;	// Reserved
-		*field++ = 1;	// 0x01
-		*field++ = 0;	// 0x00
+		extra_field += 4;	// Reserved
+		*extra_field++ = 1;	// 0x01
+		*extra_field++ = 0;	// 0x00
 
-		*field++ = 24;	// size
-		*field++ = 0;	// size
+		*extra_field++ = 24;	// size
+		*extra_field++ = 0;	// size
 
-		*(__time64_t*)field = s.st_mtime;		// ModTime
-		field += sizeof(__time64_t);
-		*(__time64_t*)field = s.st_atime;		// AcTime
-		field += sizeof(__time64_t);
-		*(__time64_t*)field = s.st_ctime;		// CrTime
-		field += sizeof(__time64_t);
+		FILETIME Modft, Accft, Creft;
+		HANDLE h = ::CreateFileA(inFile, FILE_READ_ATTRIBUTES, FILE_SHARE_READ,
+			NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+		if (h != INVALID_HANDLE_VALUE)
+		{
+			::GetFileTime(h, &Creft, &Accft, &Modft);
+			::CloseHandle(h);
 
-		extra_field_size = field - extra_field.data();
-		field = extra_field.data();
-#endif
+			ULARGE_INTEGER u;
+			u.HighPart = Creft.dwHighDateTime;
+			u.LowPart = Creft.dwLowDateTime;
+			s.st_ctime = u.QuadPart;
+
+			u.HighPart = Modft.dwHighDateTime;
+			u.LowPart = Modft.dwLowDateTime;
+			s.st_mtime = u.QuadPart;
+
+			u.HighPart = Accft.dwHighDateTime;
+			u.LowPart = Accft.dwLowDateTime;
+			s.st_atime = u.QuadPart;
+		}
+
+		// ModTime
+		*(ULONGLONG*)extra_field = s.st_mtime;
+		extra_field += 8;
+		// AcTime
+		*(ULONGLONG*)extra_field = s.st_atime;
+		extra_field += 8;
+		// CrTime
+		*(ULONGLONG*)extra_field = s.st_ctime;
+		extra_field += 8;
+
+		extra_field_size = extra_field - extra_buffer.data();
+		extra_field = extra_buffer.data();
+#endif // WIN32
 
 		err = zipOpenNewFileInZip3(zf, szFname.c_str(), &zi,
-			nullptr, 0, field, extra_field_size, NULL /* comment*/,
+			nullptr, 0, extra_field, extra_field_size, NULL /* comment*/,
 			Z_DEFLATED,
 			Z_DEFAULT_COMPRESSION, 0,
 			/* -MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY, */
