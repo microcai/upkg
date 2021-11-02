@@ -96,7 +96,8 @@ namespace util {
 		unsigned long crcFile = 0;
 		int size_buf = 16384;
 		int size_read = 0;
-		void* buf = (void*)malloc(size_buf);
+		std::vector<uint8_t> zipbuffer(size_buf, 0);
+		void* buf = (void*)zipbuffer.data();
 		const char* password = NULL;
 		FILE* fin = NULL;
 
