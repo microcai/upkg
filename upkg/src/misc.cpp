@@ -169,6 +169,7 @@ namespace util {
 		*extra_field++ = 24;	// size
 		*extra_field++ = 0;	// size
 
+		uint64_t mtime = s.st_mtime, ctime = s.st_ctime, atime = s.st_atime;
 		FILETIME Modft, Accft, Creft;
 		HANDLE h = ::CreateFileA(inFile, FILE_READ_ATTRIBUTES, FILE_SHARE_READ,
 			NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
@@ -177,28 +178,24 @@ namespace util {
 			::GetFileTime(h, &Creft, &Accft, &Modft);
 			::CloseHandle(h);
 
-			ULARGE_INTEGER u;
-			u.HighPart = Creft.dwHighDateTime;
-			u.LowPart = Creft.dwLowDateTime;
-			s.st_ctime = u.QuadPart;
+			ULARGE_INTEGER* u = (ULARGE_INTEGER*)&Creft;
+			ctime = u->QuadPart;
 
-			u.HighPart = Modft.dwHighDateTime;
-			u.LowPart = Modft.dwLowDateTime;
-			s.st_mtime = u.QuadPart;
+			u = (ULARGE_INTEGER*)&Modft;
+			mtime = u->QuadPart;
 
-			u.HighPart = Accft.dwHighDateTime;
-			u.LowPart = Accft.dwLowDateTime;
-			s.st_atime = u.QuadPart;
+			u = (ULARGE_INTEGER*)&Accft;
+			atime = u->QuadPart;
 		}
 
 		// ModTime
-		*(ULONGLONG*)extra_field = s.st_mtime;
+		*(ULONGLONG*)extra_field = mtime;
 		extra_field += 8;
 		// AcTime
-		*(ULONGLONG*)extra_field = s.st_atime;
+		*(ULONGLONG*)extra_field = atime;
 		extra_field += 8;
 		// CrTime
-		*(ULONGLONG*)extra_field = s.st_ctime;
+		*(ULONGLONG*)extra_field = ctime;
 		extra_field += 8;
 
 		extra_field_size = extra_field - extra_buffer.data();
