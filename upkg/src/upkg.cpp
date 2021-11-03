@@ -7,7 +7,6 @@
 #include "upkg/qcommondelegate.hpp"
 #include "upkg/url_parser.hpp"
 #include "upkg/misc.hpp"
-#include "upkg/CenteredBoxProxy.hpp"
 
 #ifdef WIN32
 #include <Windows.h>
