@@ -20,7 +20,7 @@ struct ModelData
 	QString m_filesize;
 	QString m_zipfilesize;
 	QString m_file_type;
-	QString m_check;
+	bool m_check;
 	QString m_url;
 };
 
@@ -44,12 +44,14 @@ public:
 	int rowCount(const QModelIndex& parent) const;
 	int columnCount(const QModelIndex& parent) const;
 
-	QString columnData(const ModelData& data, int index) const;
+	QVariant columnData(const ModelData& data, int index) const;
 
 	virtual QVariant headerData(int section, Qt::Orientation orientation, int role /* = Qt::DisplayRole */) const override;
 	virtual QVariant data(const QModelIndex& index, int role /* = Qt::DisplayRole */) const override;
-
+	virtual bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 	virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+
+	Qt::ItemFlags flags(const QModelIndex& index) const override;
 
 private:
 	void updateData(const ModelData& data);

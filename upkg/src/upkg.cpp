@@ -36,6 +36,7 @@ upkg::upkg(QWidget *parent)
 	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(4, QHeaderView::Interactive);
 	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(5, QHeaderView::Interactive);
 	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(6, QHeaderView::Interactive);
+	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(7, QHeaderView::Interactive);
 
 	QFontMetrics fm(*globalDefaultFont);
 	auto columnWidth = fm.horizontalAdvance(QString("b0baee9d279d34fa1dfd71aadb908c3f")) + 7;	// 7 column line width.

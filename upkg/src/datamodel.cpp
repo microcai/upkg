@@ -126,7 +126,7 @@ int Datamodel::rowCount(const QModelIndex&/* parent*/) const
 
 int Datamodel::columnCount(const QModelIndex& parent) const
 {
-	return 7;
+	return 8;
 }
 
 QVariant Datamodel::headerData(int section, Qt::Orientation orientation, int role /* = Qt::DisplayRole */) const
@@ -144,12 +144,14 @@ QVariant Datamodel::headerData(int section, Qt::Orientation orientation, int rol
 			case 2:
 				return QStringLiteral("文件MD5");
 			case 3:
-				return QStringLiteral("压缩文件MD5");
+				return QStringLiteral("是否压缩");
 			case 4:
-				return QStringLiteral("文件大小");
+				return QStringLiteral("压缩文件MD5");
 			case 5:
-				return QStringLiteral("压缩后大小");
+				return QStringLiteral("文件大小");
 			case 6:
+				return QStringLiteral("压缩后大小");
+			case 7:
 				return QStringLiteral("URL");
 			default:
 				break;
@@ -162,16 +164,59 @@ QVariant Datamodel::headerData(int section, Qt::Orientation orientation, int rol
 
 QVariant Datamodel::data(const QModelIndex& index, int role /* = Qt::DisplayRole */) const
 {
+	int row = index.row();
+	int col = index.column();
+
 	if (role == Qt::DisplayRole)
 	{
-		qDebug() << "DisplayRole";
 		std::shared_lock lock(m_lock);
-		return columnData(m_data[index.row()], index.column());
+		return columnData(m_data[row], col);
 	}
+
+	if (role == Qt::CheckStateRole || role == Qt::UserRole)
+	{
+		if (col == 3)
+		{
+			std::shared_lock lock(m_lock);
+			if (m_data[row].m_check)
+				return Qt::Checked;
+			return Qt::Unchecked;
+		}
+	}
+
+	if (role == Qt::TextAlignmentRole)
+	{
+		if (col == 3)
+			return Qt::AlignCenter;
+	}
+
 	return {};
 }
 
-QString Datamodel::columnData(const ModelData& data, int index) const
+bool Datamodel::setData(const QModelIndex& index, const QVariant& value, int role)
+{
+	if (role == Qt::CheckStateRole || role == Qt::UserRole)
+	{
+		int row = index.row();
+		int col = index.column();
+
+		if ((Qt::CheckState)value.toInt() == Qt::Checked)
+		{
+			std::unique_lock lock(m_lock);
+			m_data[row].m_check = true;
+		}
+		else
+		{
+			std::unique_lock lock(m_lock);
+			m_data[row].m_check = false;
+		}
+	}
+
+	emit dataChanged(index, index);
+	return true;
+}
+
+QVariant Datamodel::columnData(const ModelData& data, int index) const
 {
 	switch (index)
 	{
@@ -182,12 +227,14 @@ QString Datamodel::columnData(const ModelData& data, int index) const
 	case 2:
 		return data.m_md5;
 	case 3:
-		return data.m_zipmd5;
+		return data.m_check;
 	case 4:
-		return data.m_filesize;
+		return data.m_zipmd5;
 	case 5:
-		return data.m_zipfilesize;
+		return data.m_filesize;
 	case 6:
+		return data.m_zipfilesize;
+	case 7:
 		return data.m_url;
 	default:
 		break;
@@ -204,12 +251,38 @@ void Datamodel::sort(int column, Qt::SortOrder order /*= Qt::AscendingOrder*/)
 	if (m_data.empty())
 		return;
 
-	std::sort(m_data.begin(), m_data.end(), [column, asc, this](const auto& left, const auto& right)
-	{
-		const auto& lvar = columnData(left, column);
-		const auto& rvar = columnData(right, column);
+	auto columnMember = [](const ModelData& data, int index) -> QString {
+		switch (index)
+		{
+		case 0:
+			return data.m_filename;
+		case 1:
+			return data.m_fileversion;
+		case 2:
+			return data.m_md5;
+		case 3:
+			return QString::number(data.m_check);
+		case 4:
+			return data.m_zipmd5;
+		case 5:
+			return data.m_filesize;
+		case 6:
+			return data.m_zipfilesize;
+		case 7:
+			return data.m_url;
+		default:
+			break;
+		}
 
-		if (column == 4) // file size
+		return {};
+	};
+
+	std::sort(m_data.begin(), m_data.end(), [column, asc, columnMember, this](const auto& left, const auto& right)
+	{
+		const auto& lvar = columnMember(left, column);
+		const auto& rvar = columnMember(right, column);
+
+		if (column == 4)	// file size.
 		{
 			auto i = lvar.toInt();
 			auto j = rvar.toInt();
@@ -221,6 +294,14 @@ void Datamodel::sort(int column, Qt::SortOrder order /*= Qt::AscendingOrder*/)
 	});
 
 	dataChanged(index(0, 0), index((int)m_data.size() - 1, 7));
+}
+
+Qt::ItemFlags Datamodel::flags(const QModelIndex& index) const
+{
+	int col = index.column();
+	if (col == 3)
+		return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable;// QAbstractTableModel::flags(index);
+	return QAbstractTableModel::flags(index);
 }
 
 void Datamodel::updateData(const ModelData& data)
