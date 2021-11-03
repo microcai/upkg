@@ -5,14 +5,10 @@
 #include "upkg/misc.hpp"
 #include "upkg/upkg.hpp"
 
+#include <QLocale>
 #include <QXmlStreamWriter>
 
 extern upkg* mainWindow;
-
-enum {
-  CheckAlignmentRole = Qt::UserRole + Qt::CheckStateRole + Qt::TextAlignmentRole
-};
-
 
 Datamodel::Datamodel(QObject *parent)
 	: QAbstractTableModel(parent)
@@ -189,16 +185,32 @@ QVariant Datamodel::data(const QModelIndex& index, int role /* = Qt::DisplayRole
 		}
 	}
 
-    if (role == CheckAlignmentRole)
-    {
-        if (col == 3)
-            return Qt::AlignCenter;
-    }
-
-	if (role == Qt::TextAlignmentRole)
+	if (role == Qt::ToolTipRole)
 	{
-		if (col == 3)
-			return Qt::AlignCenter;
+		if (col == 0)
+		{
+			std::shared_lock lock(m_lock);
+			return m_data[row].m_filepath;
+		}
+		else if (col == 3)
+		{
+			std::shared_lock lock(m_lock);
+			if (columnData(m_data[row], col).toBool())
+				return tr("需要压缩");
+			return tr("不用压缩");
+		}
+		else if (col == 5 || col == 6)
+		{
+			QLocale locale{QLocale::Chinese};
+			auto size = columnData(m_data[row], col).toString().toULongLong();
+			QString valueText = locale.formattedDataSize(size);
+			return valueText;
+		}
+		else
+		{
+			std::shared_lock lock(m_lock);
+			return columnData(m_data[row], col);
+		}
 	}
 
 	return {};
@@ -267,7 +279,7 @@ void Datamodel::sort(int column, Qt::SortOrder order /*= Qt::AscendingOrder*/)
 		const QString& lvar = columnData(left, column).toString();
 		const QString& rvar = columnData(right, column).toString();
 
-		if (column == 4)	// file size.
+		if (column == 5 || column == 6)	// file size.
 		{
 			auto i = lvar.toInt();
 			auto j = rvar.toInt();
