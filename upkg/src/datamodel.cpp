@@ -238,8 +238,7 @@ QVariant Datamodel::columnData(const ModelData& data, int index) const
 	case 2:
 		return data.m_md5;
 	case 3:
-        return QVariant();
-//		return data.m_check;
+		return QString::number(data.m_check);
     case 4:
 		return data.m_zipmd5;
 	case 5:
@@ -263,36 +262,10 @@ void Datamodel::sort(int column, Qt::SortOrder order /*= Qt::AscendingOrder*/)
 	if (m_data.empty())
 		return;
 
-	auto columnMember = [](const ModelData& data, int index) -> QString {
-		switch (index)
-		{
-		case 0:
-			return data.m_filename;
-		case 1:
-			return data.m_fileversion;
-		case 2:
-			return data.m_md5;
-		case 3:
-			return QString::number(data.m_check);
-		case 4:
-			return data.m_zipmd5;
-		case 5:
-			return data.m_filesize;
-		case 6:
-			return data.m_zipfilesize;
-		case 7:
-			return data.m_url;
-		default:
-			break;
-		}
-
-		return {};
-	};
-
-	std::sort(m_data.begin(), m_data.end(), [column, asc, columnMember, this](const auto& left, const auto& right)
+	std::sort(m_data.begin(), m_data.end(), [column, asc, this](const auto& left, const auto& right)
 	{
-		const auto& lvar = columnMember(left, column);
-		const auto& rvar = columnMember(right, column);
+		const QString& lvar = columnData(left, column).toString();
+		const QString& rvar = columnData(right, column).toString();
 
 		if (column == 4)	// file size.
 		{
