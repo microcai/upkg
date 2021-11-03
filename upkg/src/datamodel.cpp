@@ -9,6 +9,11 @@
 
 extern upkg* mainWindow;
 
+enum {
+  CheckAlignmentRole = Qt::UserRole + Qt::CheckStateRole + Qt::TextAlignmentRole
+};
+
+
 Datamodel::Datamodel(QObject *parent)
 	: QAbstractTableModel(parent)
 {
@@ -184,6 +189,12 @@ QVariant Datamodel::data(const QModelIndex& index, int role /* = Qt::DisplayRole
 		}
 	}
 
+    if (role == CheckAlignmentRole)
+    {
+        if (col == 3)
+            return Qt::AlignCenter;
+    }
+
 	if (role == Qt::TextAlignmentRole)
 	{
 		if (col == 3)
@@ -227,8 +238,9 @@ QVariant Datamodel::columnData(const ModelData& data, int index) const
 	case 2:
 		return data.m_md5;
 	case 3:
-		return data.m_check;
-	case 4:
+        return QVariant();
+//		return data.m_check;
+    case 4:
 		return data.m_zipmd5;
 	case 5:
 		return data.m_filesize;

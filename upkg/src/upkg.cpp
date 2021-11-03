@@ -1,11 +1,13 @@
 ﻿#include "upkg/upkg.hpp"
 
 #include <QDebug>
+#include <QTableView>
 #include <QCryptographicHash>
 
 #include "upkg/qcommondelegate.hpp"
 #include "upkg/url_parser.hpp"
 #include "upkg/misc.hpp"
+#include "upkg/CenteredBoxProxy.hpp"
 
 #ifdef WIN32
 #include <Windows.h>
@@ -46,8 +48,8 @@ upkg::upkg(QWidget *parent)
 	m_ui.fileListView->horizontalHeader()->setStretchLastSection(true);
 	m_ui.fileListView->setSortingEnabled(true);
 
-	m_ui.fileListView->show();
-	m_ui.fileListView->setItemDelegate(new QCommonDelegate(m_ui.fileListView));
+    //m_ui.fileListView->setItemDelegate(new QCommonDelegate(m_ui.fileListView));
+    m_ui.fileListView->setStyle(new CenteredBoxProxy);
 
 	m_progressBar = new QProgressBar(m_ui.statusbar);
 	m_progressBar->setAlignment(Qt::AlignRight);
