@@ -48,8 +48,7 @@ upkg::upkg(QWidget *parent)
 	m_ui.fileListView->horizontalHeader()->setStretchLastSection(true);
 	m_ui.fileListView->setSortingEnabled(true);
 
-    //m_ui.fileListView->setItemDelegate(new QCommonDelegate(m_ui.fileListView));
-    m_ui.fileListView->setStyle(new CenteredBoxProxy);
+    m_ui.fileListView->setItemDelegate(new QCommonDelegate(m_ui.fileListView));
 
 	m_progressBar = new QProgressBar(m_ui.statusbar);
 	m_progressBar->setAlignment(Qt::AlignRight);
