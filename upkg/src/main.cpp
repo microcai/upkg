@@ -24,9 +24,6 @@ Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin);
 #include <QCoreApplication>
 #include <QFile>
 
-#include <boost/regex.hpp>
-#include <boost/asio/io_context.hpp>
-
 #include "upkg/upkg.hpp"
 
 QFont* globalDefaultFont = nullptr;
