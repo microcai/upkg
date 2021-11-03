@@ -190,7 +190,11 @@ QVariant Datamodel::data(const QModelIndex& index, int role /* = Qt::DisplayRole
 		if (col == 0)
 		{
 			std::shared_lock lock(m_lock);
+#ifdef WIN32
+			return QDir::toNativeSeparators(QDir(m_data[row].m_filepath).absolutePath());
+#else
 			return m_data[row].m_filepath;
+#endif
 		}
 		else if (col == 3)
 		{
