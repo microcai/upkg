@@ -49,6 +49,16 @@ upkg::upkg(QWidget *parent)
 
     m_ui.fileListView->setItemDelegate(new QCommonDelegate(m_ui.fileListView));
 
+	QObject::connect(m_ui.fileListView, &QTableView::doubleClicked, [this](const QModelIndex& index) mutable {
+		if (index.column() == 0)
+		{
+#ifdef WIN32
+			auto path = tr("/select,") + QDir::toNativeSeparators(m_datamodel->data(index, Qt::UserRole).toString());
+			ShellExecuteW(NULL, L"open", L"explorer.exe", path.toStdWString().c_str(), L"", SW_SHOW);
+#endif
+		}
+	});
+
 	m_progressBar = new QProgressBar(m_ui.statusbar);
 	m_progressBar->setAlignment(Qt::AlignRight);
 	m_progressBar->setMaximumSize(800, fm.height());

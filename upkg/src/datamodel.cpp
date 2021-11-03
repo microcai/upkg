@@ -174,7 +174,13 @@ QVariant Datamodel::data(const QModelIndex& index, int role /* = Qt::DisplayRole
 		return columnData(m_data[row], col);
 	}
 
-	if (role == Qt::CheckStateRole || role == Qt::UserRole)
+	if (role == Qt::UserRole)
+	{
+		std::shared_lock lock(m_lock);
+		return m_data[row].m_filepath;
+	}
+
+	if (role == Qt::CheckStateRole)
 	{
 		if (col == 3)
 		{
@@ -222,7 +228,7 @@ QVariant Datamodel::data(const QModelIndex& index, int role /* = Qt::DisplayRole
 
 bool Datamodel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-	if (role == Qt::CheckStateRole || role == Qt::UserRole)
+	if (role == Qt::CheckStateRole)
 	{
 		int row = index.row();
 		int col = index.column();

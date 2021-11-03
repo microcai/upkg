@@ -76,8 +76,8 @@ private:
 		{
 			if (index.column() == 3)
 			{
-				auto data = model->data(index, Qt::UserRole).toInt();
-				model->setData(index, data ? Qt::Unchecked : Qt::Checked, Qt::UserRole);
+				auto data = model->data(index, Qt::CheckStateRole).toInt();
+				model->setData(index, data ? Qt::Unchecked : Qt::Checked, Qt::CheckStateRole);
 			}
 		}
 		return QStyledItemDelegate::editorEvent(event, model, option, index);
