@@ -223,16 +223,28 @@ QVariant Datamodel::data(const QModelIndex& index, int role /* = Qt::DisplayRole
 		}
 	}
 
+	if (role == Qt::EditRole)
+	{
+		if (col == 7)
+		{
+			std::shared_lock lock(m_lock);
+			return columnData(m_data[row], col);
+		}
+	}
+
 	return {};
 }
 
 bool Datamodel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
+	if (!index.isValid())
+		return false;
+
+	int row = index.row();
+	int col = index.column();
+
 	if (role == Qt::CheckStateRole)
 	{
-		int row = index.row();
-		int col = index.column();
-
 		if ((Qt::CheckState)value.toInt() == Qt::Checked)
 		{
 			std::unique_lock lock(m_lock);
@@ -243,6 +255,12 @@ bool Datamodel::setData(const QModelIndex& index, const QVariant& value, int rol
 			std::unique_lock lock(m_lock);
 			m_data[row].m_compress = false;
 		}
+	}
+
+	if (role == Qt::EditRole)
+	{
+		std::unique_lock lock(m_lock);
+		m_data[row].m_url = value.toString();
 	}
 
 	emit dataChanged(index, index);
@@ -308,6 +326,8 @@ Qt::ItemFlags Datamodel::flags(const QModelIndex& index) const
 	int col = index.column();
 	if (col == 3)
 		return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable;// QAbstractTableModel::flags(index);
+	if (col == 7)
+		return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
 	return QAbstractTableModel::flags(index);
 }
 
