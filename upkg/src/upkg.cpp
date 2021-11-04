@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QTableView>
 #include <QCryptographicHash>
+#include <QDesktopServices>
 
 #include "upkg/qcommondelegate.hpp"
 #include "upkg/url_parser.hpp"
@@ -55,6 +56,9 @@ upkg::upkg(QWidget *parent)
 #ifdef WIN32
 			auto path = tr("/select,") + QDir::toNativeSeparators(m_datamodel->data(index, Qt::UserRole).toString());
 			ShellExecuteW(NULL, L"open", L"explorer.exe", path.toStdWString().c_str(), L"", SW_SHOW);
+#else
+			auto dir = QDir(m_datamodel->data(index, Qt::UserRole)).dirName();
+			QDesktopServices::openUrl(QUrl(dir, QUrl::TolerantMode));
 #endif
 		}
 	});
