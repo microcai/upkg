@@ -59,8 +59,19 @@ void Datamodel::work(const QString& url,
 	stream.setAutoFormatting(true);
 	stream.writeStartDocument();
 
+	int count = 0;
+
+	for (size_t i = 0; i < m_data_count; i++)
+	{
+		std::shared_lock lock(m_lock);
+		const auto& data = m_data[i];
+		if (data.m_remove)
+			continue;
+		count++;
+	}
+
 	stream.writeStartElement("update_root");
-	stream.writeAttribute("count", QString::number(m_data_count));
+	stream.writeAttribute("count", QString::number(count));
 
 	auto time = QDateTime::currentDateTime();
 	stream.writeAttribute("createtime", time.toString("yyyy-MM-dd hh:mm:ss.zzz"));
@@ -77,6 +88,9 @@ void Datamodel::work(const QString& url,
 		{
 			std::unique_lock lock(m_lock);
 			data = m_data[i];
+
+			if (data.m_remove)
+				continue;
 		}
 
 		QDir dir(data.m_filepath);
@@ -189,6 +203,14 @@ QVariant Datamodel::data(const QModelIndex& index, int role /* = Qt::DisplayRole
 
 	if (role == Qt::CheckStateRole)
 	{
+		if (col == 0)
+		{
+			std::shared_lock lock(m_lock);
+			if (!m_data[row].m_remove)
+				return Qt::Checked;
+			return Qt::Unchecked;
+		}
+
 		if (col == 3)
 		{
 			std::shared_lock lock(m_lock);
@@ -252,15 +274,32 @@ bool Datamodel::setData(const QModelIndex& index, const QVariant& value, int rol
 
 	if (role == Qt::CheckStateRole)
 	{
-		if ((Qt::CheckState)value.toInt() == Qt::Checked)
+		if (col == 0)
 		{
-			std::unique_lock lock(m_lock);
-			m_data[row].m_compress = true;
+			if ((Qt::CheckState)value.toInt() == Qt::Checked)
+			{
+				std::unique_lock lock(m_lock);
+				m_data[row].m_remove = false;
+			}
+			else
+			{
+				std::unique_lock lock(m_lock);
+				m_data[row].m_remove = true;
+			}
 		}
-		else
+
+		if (col == 3)
 		{
-			std::unique_lock lock(m_lock);
-			m_data[row].m_compress = false;
+			if ((Qt::CheckState)value.toInt() == Qt::Checked)
+			{
+				std::unique_lock lock(m_lock);
+				m_data[row].m_compress = true;
+			}
+			else
+			{
+				std::unique_lock lock(m_lock);
+				m_data[row].m_compress = false;
+			}
 		}
 	}
 
@@ -331,8 +370,10 @@ void Datamodel::sort(int column, Qt::SortOrder order /*= Qt::AscendingOrder*/)
 Qt::ItemFlags Datamodel::flags(const QModelIndex& index) const
 {
 	int col = index.column();
+	if (col == 0)
+		return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable;
 	if (col == 3)
-		return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable;// QAbstractTableModel::flags(index);
+		return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable;
 	if (col == 7)
 		return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
 	return QAbstractTableModel::flags(index);
