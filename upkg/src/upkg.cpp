@@ -56,7 +56,7 @@ upkg::upkg(QWidget *parent)
 #ifdef WIN32
             auto explorer = new QProcess(this);
             connect(explorer, SIGNAL(finished(int,QProcess::ExitStatus)), explorer, SLOT(deleteLater()));
-            explorer->start("explorer.exe", { "/select", QDir::toNativeSeparators(m_datamodel->data(index, Qt::UserRole).toString() });
+            explorer->start("explorer.exe", { "/select,", QDir::toNativeSeparators(m_datamodel->data(index, Qt::UserRole).toString()) });
 //			auto path = tr("/select,") + QDir::toNativeSeparators(m_datamodel->data(index, Qt::UserRole).toString());
 //			ShellExecuteW(NULL, L"open", L"explorer.exe", path.toStdWString().c_str(), L"", SW_SHOW);
 #else
