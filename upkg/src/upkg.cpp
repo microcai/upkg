@@ -54,12 +54,17 @@ upkg::upkg(QWidget *parent)
 		if (index.column() == 0)
 		{
 #ifdef WIN32
-			auto path = tr("/select,") + QDir::toNativeSeparators(m_datamodel->data(index, Qt::UserRole).toString());
-			ShellExecuteW(NULL, L"open", L"explorer.exe", path.toStdWString().c_str(), L"", SW_SHOW);
+            auto explorer = new QProcess(this);
+            connect(explorer, SIGNAL(finished(int,QProcess::ExitStatus)), explorer, SLOT(deleteLater()));
+            explorer->start("explorer.exe", { "/select", QDir::toNativeSeparators(m_datamodel->data(index, Qt::UserRole).toString() });
+//			auto path = tr("/select,") + QDir::toNativeSeparators(m_datamodel->data(index, Qt::UserRole).toString());
+//			ShellExecuteW(NULL, L"open", L"explorer.exe", path.toStdWString().c_str(), L"", SW_SHOW);
 #else
             if(qEnvironmentVariable("XDG_CURRENT_DESKTOP")== "KDE")
             {
-                QProcess::execute("/usr/bin/dolphin", { "--select", m_datamodel->data(index, Qt::UserRole).toString()});
+                auto dolphin = new QProcess;
+                connect(dolphin, SIGNAL(finished(int,QProcess::ExitStatus)), dolphin, SLOT(deleteLater()));
+                dolphin->start("/usr/bin/dolphin", { "--select", m_datamodel->data(index, Qt::UserRole).toString()});
             }
             else
             {
