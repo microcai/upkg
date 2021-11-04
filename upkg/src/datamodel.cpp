@@ -82,20 +82,24 @@ void Datamodel::work(const QString& url,
 		QDir dir(data.m_filepath);
 		QString relative = data.m_filepath;
 		relative.replace(inputDir.absolutePath(), "");
-
-		data.m_zipfilepath = dir.absolutePath().replace(inputDir.absolutePath(), outputDir.absolutePath()) + tr(".") + data.m_file_type;
+		QString ext;
+		if (data.m_compress)
+			ext = tr(".") + data.m_file_type;
+		data.m_zipfilepath = dir.absolutePath().replace(inputDir.absolutePath(), outputDir.absolutePath()) + ext;
 		auto mdir = std::filesystem::path(data.m_zipfilepath.toStdWString()).parent_path();
 		std::error_code ignore_ec;
 		std::filesystem::create_directories(mdir, ignore_ec);
-
-		util::compress_zip(data.m_filepath.toLocal8Bit().data(), data.m_zipfilepath.toLocal8Bit().data());
+		if (data.m_compress)
+			util::compress_zip(data.m_filepath.toLocal8Bit().data(), data.m_zipfilepath.toLocal8Bit().data());
+		else
+			QFile::copy(data.m_filepath, data.m_zipfilepath);
 		data.m_zipmd5 = util::md5sum(data.m_zipfilepath, abort);
 		data.m_zipfilesize = QString::number(QFile(data.m_zipfilepath).size());
 		QString prefix = "/";
 		QString baseUrl = url;
 		if (baseUrl.right(1) == "/") baseUrl = baseUrl.left(baseUrl.size() - 1);
 		if (relative.left(1) == "/") relative = relative.mid(1);
-		data.m_url = baseUrl + prefix + relative + tr(".") + data.m_file_type;
+		data.m_url = baseUrl + prefix + relative + ext;
 
 		updateData(data);
 
@@ -106,7 +110,10 @@ void Datamodel::work(const QString& url,
 		stream.writeAttribute("zipsize", data.m_zipfilesize);
 		stream.writeAttribute("md5", data.m_md5);
 		stream.writeAttribute("filehash", data.m_zipmd5);
-		stream.writeAttribute("compress", data.m_file_type);
+		if (data.m_compress)
+			stream.writeAttribute("compress", data.m_file_type);
+		else
+			stream.writeAttribute("compress", "none");
 		stream.writeAttribute("url", data.m_url);
 		stream.writeEndElement();
 
