@@ -185,7 +185,7 @@ QVariant Datamodel::data(const QModelIndex& index, int role /* = Qt::DisplayRole
 		if (col == 3)
 		{
 			std::shared_lock lock(m_lock);
-			if (m_data[row].m_check)
+			if (m_data[row].m_compress)
 				return Qt::Checked;
 			return Qt::Unchecked;
 		}
@@ -236,12 +236,12 @@ bool Datamodel::setData(const QModelIndex& index, const QVariant& value, int rol
 		if ((Qt::CheckState)value.toInt() == Qt::Checked)
 		{
 			std::unique_lock lock(m_lock);
-			m_data[row].m_check = true;
+			m_data[row].m_compress = true;
 		}
 		else
 		{
 			std::unique_lock lock(m_lock);
-			m_data[row].m_check = false;
+			m_data[row].m_compress = false;
 		}
 	}
 
@@ -260,7 +260,7 @@ QVariant Datamodel::columnData(const ModelData& data, int index) const
 	case 2:
 		return data.m_md5;
 	case 3:
-		return QString::number(data.m_check);
+		return QString::number(data.m_compress);
     case 4:
 		return data.m_zipmd5;
 	case 5:

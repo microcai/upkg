@@ -20,7 +20,7 @@ struct ModelData
 	QString m_filesize;
 	QString m_zipfilesize;
 	QString m_file_type;
-	bool m_check{true};
+	bool m_compress{true};
 	QString m_url;
 };
 
