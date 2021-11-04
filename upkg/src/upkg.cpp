@@ -57,8 +57,9 @@ upkg::upkg(QWidget *parent)
 			auto path = tr("/select,") + QDir::toNativeSeparators(m_datamodel->data(index, Qt::UserRole).toString());
 			ShellExecuteW(NULL, L"open", L"explorer.exe", path.toStdWString().c_str(), L"", SW_SHOW);
 #else
-			auto dir = QDir(m_datamodel->data(index, Qt::UserRole)).dirName();
-			QDesktopServices::openUrl(QUrl(dir, QUrl::TolerantMode));
+			auto path = m_datamodel->data(index, Qt::UserRole).toString().toStdString();
+			auto parent_path = std::filesystem::path(path).parent_path().string();
+			QDesktopServices::openUrl(QUrl(QString::fromStdString(parent_path), QUrl::TolerantMode));
 #endif
 		}
 	});
