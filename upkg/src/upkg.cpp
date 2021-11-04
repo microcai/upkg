@@ -57,9 +57,16 @@ upkg::upkg(QWidget *parent)
 			auto path = tr("/select,") + QDir::toNativeSeparators(m_datamodel->data(index, Qt::UserRole).toString());
 			ShellExecuteW(NULL, L"open", L"explorer.exe", path.toStdWString().c_str(), L"", SW_SHOW);
 #else
-			auto path = m_datamodel->data(index, Qt::UserRole).toString().toStdString();
-			auto parent_path = std::filesystem::path(path).parent_path().string();
-			QDesktopServices::openUrl(QUrl(QString::fromStdString(parent_path), QUrl::TolerantMode));
+            if(qEnvironmentVariable("XDG_CURRENT_DESKTOP")== "KDE")
+            {
+                QProcess::execute("/usr/bin/dolphin", { "--select", m_datamodel->data(index, Qt::UserRole).toString()});
+            }
+            else
+            {
+                auto path = m_datamodel->data(index, Qt::UserRole).toString().toStdString();
+                auto parent_path = std::filesystem::path(path).parent_path().string();
+                QDesktopServices::openUrl(QUrl(QString::fromStdString(parent_path), QUrl::TolerantMode));
+            }
 #endif
 		}
 	});
