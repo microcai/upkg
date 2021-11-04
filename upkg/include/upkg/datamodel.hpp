@@ -36,7 +36,7 @@ public:
 	void insertData(const std::vector<ModelData>& data);
 	void deleteAllData();
 
-	void work(const QString& url,
+	int work(const QString& url,
 		const QDir& inputDir, const QDir& outputDir,
 		const QString& xmlFileName,
 		QProgressBar* progressBar,

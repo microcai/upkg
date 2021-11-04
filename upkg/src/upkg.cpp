@@ -174,7 +174,8 @@ upkg::upkg(QWidget *parent)
 	QObject::connect(this, &upkg::scanDir, [this](QDir dir) mutable
 	{
 		walkDir(dir);
-		m_statusLable->setText(tr("扫描目录完成"));
+		auto count = m_datamodel->rowCount({});
+		m_statusLable->setText(tr("扫描目录完成 ") + QString::number(count) + tr(" 文件"));
 		m_abort = false;
 	});
 
@@ -185,9 +186,9 @@ upkg::upkg(QWidget *parent)
 		auto url = m_ui.UrlEdit->text();
 		auto xmlFileName = m_ui.XmlEdit->text();
 
-		m_datamodel->work(url, inputDir, outputDir, xmlFileName, m_progressBar, m_abort);
+		auto count = m_datamodel->work(url, inputDir, outputDir, xmlFileName, m_progressBar, m_abort);
 
-		m_statusLable->setText(tr("完成"));
+		m_statusLable->setText(tr("完成, 共计 ") + QString::number(count) + tr(" 文件"));
 		m_abort = false;
 
 #ifdef WIN32

@@ -43,7 +43,7 @@ void Datamodel::deleteAllData()
 	m_data_count = (int)m_data.size();
 }
 
-void Datamodel::work(const QString& url,
+int Datamodel::work(const QString& url,
 	const QDir& inputDir, const QDir& outputDir,
 	const QString& xmlFileName,
 	QProgressBar* progressBar,
@@ -139,6 +139,8 @@ void Datamodel::work(const QString& url,
 	stream.writeEndElement();
 	stream.writeEndDocument();
 	file.close();
+
+	return count;
 }
 
 int Datamodel::rowCount(const QModelIndex&/* parent*/) const
