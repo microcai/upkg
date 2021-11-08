@@ -30,7 +30,7 @@ upkg::upkg(QWidget *parent)
 	m_ui.fileListView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	m_ui.fileListView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	m_ui.fileListView->horizontalHeader()->setDisabled(false);
-	// m_ui.fileListView->verticalHeader()->hide();
+	m_ui.fileListView->verticalHeader()->hide();
 
 	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
 	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Interactive);
@@ -87,6 +87,11 @@ upkg::upkg(QWidget *parent)
 	QObject::connect(this, &upkg::workProgress, this, [this](int value) {
  		m_progressBar->setValue(value);
  	}, Qt::QueuedConnection);
+
+	QObject::connect(this, &upkg::workCount, this, [this](int count) {
+		m_progressBar->setMinimum(0);
+		m_progressBar->setMaximum(count);
+	}, Qt::QueuedConnection);
 
 	m_ui.InputDirEdit->setReadOnly(true);
 	QObject::connect(m_ui.InputDirBtn, &QPushButton::clicked, [this]() mutable
@@ -174,7 +179,13 @@ upkg::upkg(QWidget *parent)
 
 	QObject::connect(this, &upkg::scanDir, [this](QDir dir) mutable
 	{
-		walkDir(dir);
+		Q_EMIT this->workCount(0);
+		m_statusLable->setText(tr("正在统计目录..."));
+		auto fileLists = countDir(dir);
+		Q_EMIT this->workCount(fileLists.size());
+		Q_EMIT this->workProgress(0);
+		m_statusLable->setText(tr("共计文件: ") + QString::number(fileLists.size()) + tr(" 正在扫描目录..."));
+		walkDir(fileLists);
 		auto count = m_datamodel->rowCount({});
 		m_statusLable->setText(tr("扫描目录完成 ") + QString::number(count) + tr(" 文件"));
 		m_abort = false;
@@ -292,14 +303,14 @@ void upkg::loadDir() noexcept
 	m_scanning_thrd = QtConcurrent::run([this, inputDir] { scanDir(inputDir); });
 }
 
-QFileInfoList upkg::walkDir(const QDir& dir)
+void upkg::walkDir(const QFileInfoList& fileLists)
 {
-	QFileInfoList fileList = dir.entryInfoList(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
-	QFileInfoList folderList = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
 	const auto readBufferSize = 512 * 1024;
 	static QByteArray buffer(readBufferSize, 0);
+	uint64_t index = 0;
+	std::vector<ModelData> mdata;
 
-	for (auto& fileinfo : fileList)
+	for (auto& fileinfo : fileLists)
 	{
 		if (m_abort)
 			break;
@@ -316,15 +327,33 @@ QFileInfoList upkg::walkDir(const QDir& dir)
 		data.m_filepath = fileinfo.absoluteFilePath();
 		data.m_file_type = tr("zip");
 		data.m_md5 = util::md5sum(fileinfo.absoluteFilePath(), m_abort);
-		m_datamodel->insertData(data);
+		mdata.push_back(data);
+
+		Q_EMIT this->workProgress(++index);
+	}
+
+	m_datamodel->insertData(mdata);
+}
+
+QFileInfoList upkg::countDir(const QDir& dir)
+{
+	QFileInfoList fileList = dir.entryInfoList(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
+	QFileInfoList folderList = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+	QFileInfoList result;
+
+	for (auto& fileinfo : fileList)
+	{
+		if (m_abort)
+			break;
+		result.push_back(fileinfo);
 	}
 
 	for (auto& folder : folderList)
 	{
 		if (m_abort)
 			break;
-		walkDir(folder.absoluteFilePath());
+		result += countDir(folder.absoluteFilePath());
 	}
 
-	return fileList;
+	return result;
 }

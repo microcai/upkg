@@ -207,13 +207,13 @@ namespace util {
 
 #endif // WIN32
 
-        err = zipOpenNewFileInZip4(zf, szFname.c_str(), &zi,
+        err = zipOpenNewFileInZip4_64(zf, szFname.c_str(), &zi,
 			nullptr, 0, extra_field, extra_field_size, NULL /* comment*/,
             Z_DEFLATED,
 			Z_DEFAULT_COMPRESSION, 0,
 			/* -MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY, */
 			-MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY,
-            password, crcFile, madeby, 0 );
+            password, crcFile, madeby, 1 << 11, 1);
 		if (err != ZIP_OK)
 		{
 			zipClose(zf, NULL);

@@ -36,7 +36,8 @@ private:
 
 	void loadDir() noexcept;
 
-	QFileInfoList walkDir(const QDir& dir);
+	void walkDir(const QFileInfoList& fileLists);
+	QFileInfoList countDir(const QDir& dir);
 
 public:
 signals:
@@ -44,6 +45,7 @@ signals:
 	void initWork();
 	void workDir();
 	void workProgress(int value);
+	void workCount(int count);
 
 private:
 	Ui::upkgClass m_ui;
