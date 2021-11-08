@@ -17,8 +17,8 @@ struct ModelData
 	QString m_md5;
 	QString m_zipmd5;
 	QString m_zipfilepath;
-	QString m_filesize;
-	QString m_zipfilesize;
+	int64_t m_filesize{0};
+	int64_t m_zipfilesize{0};
 	QString m_file_type;
 	bool m_compress{true};
 	bool m_remove{false};

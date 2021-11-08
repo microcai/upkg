@@ -28,8 +28,9 @@ upkg::upkg(QWidget *parent)
 	m_ui.fileListView->setModel(m_datamodel);
 
 	m_ui.fileListView->setSelectionBehavior(QAbstractItemView::SelectRows);
-	m_ui.fileListView->setSelectionMode(QAbstractItemView::SingleSelection);
+	m_ui.fileListView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	m_ui.fileListView->horizontalHeader()->setDisabled(false);
+	// m_ui.fileListView->verticalHeader()->hide();
 
 	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
 	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Interactive);
@@ -310,7 +311,7 @@ QFileInfoList upkg::walkDir(const QDir& dir)
 		ModelData data;
 
 		data.m_fileversion = util::GetFileVertion(fileinfo.absoluteFilePath());
-		data.m_filesize = QString::number(fileSize);
+		data.m_filesize = fileSize;
 		data.m_filename = fileName;
 		data.m_filepath = fileinfo.absoluteFilePath();
 		data.m_file_type = tr("zip");

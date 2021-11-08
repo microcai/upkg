@@ -108,7 +108,7 @@ int Datamodel::work(const QString& url,
 		else
 			QFile::copy(data.m_filepath, data.m_zipfilepath);
 		data.m_zipmd5 = util::md5sum(data.m_zipfilepath, abort);
-		data.m_zipfilesize = QString::number(QFile(data.m_zipfilepath).size());
+		data.m_zipfilesize = QFile(data.m_zipfilepath).size();
 		QString prefix = "/";
 		QString baseUrl = url;
 		if (baseUrl.right(1) == "/") baseUrl = baseUrl.left(baseUrl.size() - 1);
@@ -120,8 +120,8 @@ int Datamodel::work(const QString& url,
 		stream.writeStartElement("file");
 		stream.writeAttribute("name", relative);
 		stream.writeAttribute("version", data.m_fileversion);
-		stream.writeAttribute("size", data.m_filesize);
-		stream.writeAttribute("zipsize", data.m_zipfilesize);
+		stream.writeAttribute("size", QString::number(data.m_filesize));
+		stream.writeAttribute("zipsize", QString::number(data.m_zipfilesize));
 		stream.writeAttribute("md5", data.m_md5);
 		stream.writeAttribute("filehash", data.m_zipmd5);
 		if (data.m_compress)
@@ -350,18 +350,48 @@ void Datamodel::sort(int column, Qt::SortOrder order /*= Qt::AscendingOrder*/)
 	if (m_data.empty())
 		return;
 
-	std::sort(m_data.begin(), m_data.end(), [column, asc, this](const auto& left, const auto& right)
-	{
-		const QString& lvar = columnData(left, column).toString();
-		const QString& rvar = columnData(right, column).toString();
-
-		if (column == 5 || column == 6)	// file size.
+	QString tmp;
+	const auto columnMember = [&tmp](const ModelData& data, int index) -> const QString& {
+		switch (index)
 		{
-			auto i = lvar.toInt();
-			auto j = rvar.toInt();
+		case 0: return data.m_filename;
+		case 1: return data.m_fileversion;
+		case 2: return data.m_md5;
+		case 4: return data.m_zipmd5;
+		case 7: return data.m_url;
+		default:
+			break;
+		}
+
+		Q_ASSERT(false && "columnMember index incorrect!");
+		return tmp;
+	};
+
+	std::sort(m_data.begin(), m_data.end(), [column, asc, columnMember, this](const auto& left, const auto& right)
+	{
+		if (column == 5 || column == 6)
+		{
+			int64_t i = 0;
+			int64_t j = 0;
+			switch (column)
+			{
+			case 5:
+				i = left.m_filesize;
+				j = right.m_filesize;
+				break;
+			case 6:
+				i = left.m_zipfilesize;
+				j = right.m_zipfilesize;
+				break;
+			default:
+				break;
+			}
 
 			return asc ? (i < j) : (i > j);
 		}
+
+		const auto& lvar = columnMember(left, column);
+		const auto& rvar = columnMember(right, column);
 
 		return asc ? (lvar < rvar) : (lvar > rvar);
 	});
