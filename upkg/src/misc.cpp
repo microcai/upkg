@@ -207,13 +207,17 @@ namespace util {
 
 #endif // WIN32
 
+		int zip64 = 0;
+		if (boost::filesystem::file_size(infile) > 0xffffffff)
+			zip64 = 1;
+
         err = zipOpenNewFileInZip4_64(zf, szFname.c_str(), &zi,
 			nullptr, 0, extra_field, extra_field_size, NULL /* comment*/,
             Z_DEFLATED,
 			Z_DEFAULT_COMPRESSION, 0,
 			/* -MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY, */
 			-MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY,
-            password, crcFile, madeby, 1 << 11, 1);
+            password, crcFile, madeby, 0, zip64);
 		if (err != ZIP_OK)
 		{
 			zipClose(zf, NULL);
