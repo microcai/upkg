@@ -42,7 +42,7 @@ upkg::upkg(QWidget *parent)
 	m_ui.fileListView->horizontalHeader()->setSectionResizeMode(7, QHeaderView::Interactive);
 
 	QFontMetrics fm(*globalDefaultFont);
-	auto columnWidth = fm.horizontalAdvance(QString("b0baee9d279d34fa1dfd71aadb908c3f")) + 7;	// 7 column line width.
+	auto columnWidth = fm.horizontalAdvance(QStringLiteral("b0baee9d279d34fa1dfd71aadb908c3f")) + 7;	// 7 column line width.
 	m_ui.fileListView->setColumnWidth(2, columnWidth);
 	m_ui.fileListView->setColumnWidth(3, columnWidth);
 
@@ -57,7 +57,8 @@ upkg::upkg(QWidget *parent)
 #ifdef WIN32
             auto explorer = new QProcess(this);
             connect(explorer, SIGNAL(finished(int, QProcess::ExitStatus)), explorer, SLOT(deleteLater()));
-            explorer->start("explorer.exe", { "/select,", QDir::toNativeSeparators(m_datamodel->data(index, Qt::UserRole).toString()) });
+            explorer->start(QStringLiteral("explorer.exe"),
+				{ QStringLiteral("/select,"), QDir::toNativeSeparators(m_datamodel->data(index, Qt::UserRole).toString()) });
 #else
             if(qEnvironmentVariable("XDG_CURRENT_DESKTOP")== "KDE")
             {
@@ -330,7 +331,7 @@ void upkg::walkDir(const QFileInfoList& fileLists)
 			break;
 
 		auto fileName = fileinfo.fileName();
-		auto zipFileName = fileName + ".zip";
+		auto zipFileName = fileName + QStringLiteral(".zip");
 		auto fileSize = fileinfo.size();
 
 		ModelData data;
@@ -339,7 +340,7 @@ void upkg::walkDir(const QFileInfoList& fileLists)
 		data.m_filesize = fileSize;
 		data.m_filename = fileName;
 		data.m_filepath = fileinfo.absoluteFilePath();
-		data.m_file_type = tr("zip");
+		data.m_file_type = QStringLiteral("zip");
 		data.m_md5 = util::md5sum(fileinfo.absoluteFilePath(), m_abort);
 		mdata.push_back(data);
 
