@@ -339,9 +339,8 @@ namespace util {
 					buffer.resize(readBytes);
 					hash.addData(buffer);
 				}
-
-				return hash.result().toHex();
 			}
+			return hash.result().toHex();
 		}
 
 		return {};
