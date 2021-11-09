@@ -155,6 +155,9 @@ upkg::upkg(QWidget *parent)
 			return;
 		}
 
+		auto count = m_datamodel->rowCount({});
+		m_statusLable->setText(tr("正在打包, 共 ") + QString::number(count) + tr(" 文件"));
+
 		m_progressBar->setMaximum(m_datamodel->rowCount({}));
 		m_progressBar->setMinimum(0);
 
