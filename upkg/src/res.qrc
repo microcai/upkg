@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>upkg.ico</file>
+        <file alias="upkg.ico">upkg.png</file>
     </qresource>
 </RCC>
