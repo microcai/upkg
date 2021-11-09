@@ -209,6 +209,17 @@ upkg::upkg(QWidget *parent)
 #ifdef WIN32
 		auto dir = QDir::toNativeSeparators(outputDir.absolutePath());
 		ShellExecuteW(NULL, L"open", L"explorer.exe", dir.toStdWString().c_str(), L"", SW_SHOW);
+#else
+		if (qEnvironmentVariable("XDG_CURRENT_DESKTOP") == "KDE")
+		{
+			auto dolphin = new QProcess;
+			connect(dolphin, SIGNAL(finished(int, QProcess::ExitStatus)), dolphin, SLOT(deleteLater()));
+			dolphin->start("/usr/bin/dolphin", { "--select", outputDir });
+		}
+		else
+		{
+			QDesktopServices::openUrl(QUrl(outputDir, QUrl::TolerantMode));
+		}
 #endif
 	});
 
