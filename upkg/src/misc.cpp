@@ -151,7 +151,7 @@ namespace util {
 
 		uint8_t* extra_field = nullptr;
 		uInt extra_field_size = 0;
-        uint madeby = 0;
+		uint madeby = 0;
 
 #ifdef WIN32
 		zi.external_fa = ::GetFileAttributesA(inFile);
@@ -200,10 +200,10 @@ namespace util {
 		extra_field += 8;
 
 		extra_field_size = extra_field - extra_buffer.data();
-        extra_field = extra_buffer.data();
-        madeby = 0x3f;
+		extra_field = extra_buffer.data();
+		madeby = 0x3f;
 #else
-        madeby = 0x31e;
+		madeby = 0x31e;
 
 #endif // WIN32
 
@@ -211,13 +211,13 @@ namespace util {
 		if (boost::filesystem::file_size(infile) > 0xffffffff)
 			zip64 = 1;
 
-        err = zipOpenNewFileInZip4_64(zf, szFname.c_str(), &zi,
+		err = zipOpenNewFileInZip4_64(zf, szFname.c_str(), &zi,
 			nullptr, 0, extra_field, extra_field_size, NULL /* comment*/,
-            Z_DEFLATED,
+			Z_DEFLATED,
 			Z_DEFAULT_COMPRESSION, 0,
 			/* -MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY, */
 			-MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY,
-            password, crcFile, madeby, 0, zip64);
+			password, crcFile, madeby, 0, zip64);
 		if (err != ZIP_OK)
 		{
 			zipClose(zf, NULL);
