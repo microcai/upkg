@@ -55,7 +55,7 @@ private:
 		if (index.column() == 3)
 		{
 			// Remove check box title.
- 			viewOption.text = tr("");
+			viewOption.text.clear();
 
 			// Use checkBoxProxy.drawControl...
  			const QWidget* widget = viewOption.widget;
