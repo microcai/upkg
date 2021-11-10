@@ -37,11 +37,8 @@ namespace util {
 		FILE* in = fopen(inFile, "rb");
 		if (in)
 		{
-			gzFile out;
-			char outmode[20];
-
-			strcpy(outmode, "wb6f");
-			out = gzopen(outFile, outmode);
+			const char* outmode = "wb6f";
+			auto out = gzopen(outFile, outmode);
 			if (out)
 			{
 				char buf[16384];
@@ -63,7 +60,7 @@ namespace util {
 
 				fclose(in);
 				if (gzclose(out) != Z_OK)
-					return do_return("zipOpenNewFileInZip3 failed");
+					return do_return("gzclose failed");
 
 				ret = true;
 				return do_return();
@@ -221,7 +218,7 @@ namespace util {
 		if (err != ZIP_OK)
 		{
 			zipClose(zf, NULL);
-			return do_return("zipOpenNewFileInZip3 failed");
+			return do_return("zipOpenNewFileInZip4_64 failed");
 		}
 		else
 		{
