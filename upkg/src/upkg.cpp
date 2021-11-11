@@ -320,8 +320,6 @@ void upkg::loadDir() noexcept
 
 void upkg::walkDir(const QFileInfoList& fileLists)
 {
-	const auto readBufferSize = 512 * 1024;
-	static QByteArray buffer(readBufferSize, 0);
 	uint64_t index = 0;
 	std::vector<ModelData> mdata;
 
