@@ -103,6 +103,7 @@ int Datamodel::work(const QString& url,
 		auto mdir = std::filesystem::path(data.m_zipfilepath.toStdWString()).parent_path();
 		std::error_code ignore_ec;
 		std::filesystem::create_directories(mdir, ignore_ec);
+		QFile::remove(data.m_zipfilepath);
 		if (data.m_compress)
 			util::compress_zip(data.m_filepath.toLocal8Bit().data(), data.m_zipfilepath.toLocal8Bit().data());
 		else
