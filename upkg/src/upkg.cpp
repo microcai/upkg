@@ -215,11 +215,11 @@ upkg::upkg(QWidget *parent)
 		{
 			auto dolphin = new QProcess;
 			connect(dolphin, SIGNAL(finished(int, QProcess::ExitStatus)), dolphin, SLOT(deleteLater()));
-			dolphin->start("/usr/bin/dolphin", { "--select", outputDir });
+            dolphin->start("/usr/bin/dolphin", { "--select", outputDir.absolutePath() });
 		}
 		else
 		{
-			QDesktopServices::openUrl(QUrl(outputDir, QUrl::TolerantMode));
+            QDesktopServices::openUrl(outputDir.absolutePath());
 		}
 #endif
 	});
