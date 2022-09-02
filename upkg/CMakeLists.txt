@@ -56,7 +56,7 @@ set(upkg_SRCS
 	include/upkg/upkg.hpp
 	include/upkg/datamodel.hpp
 	include/upkg/qcommondelegate.hpp
-	include/upkg/url_parser.hpp
+	include/upkg/url_view.hpp
 	include/upkg/misc.hpp
 
 	src/main.cpp

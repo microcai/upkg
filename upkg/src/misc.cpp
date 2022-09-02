@@ -4,7 +4,7 @@
 #include <sys/stat.h>
 
 #include <ctime>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #ifdef _MSC_VER
 #	include <windows.h>
@@ -78,7 +78,7 @@ namespace util {
 			return std::make_tuple(ret, error_info);
 		};
 
-		boost::filesystem::path infile(inFile);
+		std::filesystem::path infile(inFile);
 		std::string szFname = infile.filename().string();
 
 		zipFile zf;
@@ -205,7 +205,7 @@ namespace util {
 #endif // WIN32
 
 		int zip64 = 0;
-		if (boost::filesystem::file_size(infile) > 0xffffffff)
+		if (std::filesystem::file_size(infile) > 0xffffffff)
 			zip64 = 1;
 
 		err = zipOpenNewFileInZip4_64(zf, szFname.c_str(), &zi,
