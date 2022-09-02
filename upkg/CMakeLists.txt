@@ -6,7 +6,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/upkg.rc.in
 		${CMAKE_CURRENT_SOURCE_DIR}/src/upkg.rc @ONLY NEWLINE_STYLE LF)
 
 set(CMAKE_AUTOMOC ON)
-set(QtComponent Core Gui Widgets Concurrent)
+set(QtComponent BundledPcre2 BundledLibpng BundledHarfbuzz BundledFreetype BundledLibjpeg CoreTools GuiTools WidgetsTools Core Gui Widgets Concurrent)
 
 if(WIN32)
 	if(MSVC AND ENABLE_QT_STATIC)
@@ -14,7 +14,7 @@ if(WIN32)
 	endif()
 endif()
 
-find_package(Qt6 6.2.0 COMPONENTS ${QtComponent} REQUIRED)
+find_package(Qt6 6.3.0 COMPONENTS ${QtComponent} REQUIRED)
 link_libraries(Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Concurrent)
 
 if(WIN32 AND MSVC AND ENABLE_QT_STATIC)
