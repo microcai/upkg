@@ -9,8 +9,6 @@
 
 #include <boost/json.hpp>
 
-#ifndef BOOST_JSON_STANDALONE
-
 #include <algorithm>
 #include <cmath>
 #include <complex>
@@ -497,6 +495,17 @@ usingObjects()
     catch (...)
     {
     }
+    {
+        //[snippet_objects_5
+
+        object obj{{"arr", {1, 11}}};
+        value& arr = obj.at("arr");
+        obj.emplace("added", "value"); // invalidates arr
+
+        //]
+
+        (void)arr;
+    }
 }
 
 //----------------------------------------------------------
@@ -783,6 +792,60 @@ usingExchange()
     }
 }
 
+void
+usingPointer()
+{
+    //[snippet_pointer_1
+    value jv = { {"one", 1}, {"two", 2} };
+    assert( jv.at("one") == jv.at_pointer("/one") );
+
+    jv.at_pointer("/one") = {{"foo", "bar"}};
+    assert( jv.at("one").at("foo") == jv.at_pointer("/one/foo") );
+
+    jv.at_pointer("/one/foo") = {true, 4, "qwerty"};
+    assert( jv.at("one").at("foo").at(1) == jv.at_pointer("/one/foo/1") );
+    //]
+
+    value* elem1 = [&]() -> value*
+    {
+        //[snippet_pointer_2
+        object* obj = jv.if_object();
+        if( !obj )
+            return nullptr;
+
+        value* val = obj->if_contains("one");
+        if( !val )
+            return nullptr;
+
+        obj = val->if_object();
+        if( !obj )
+            return nullptr;
+
+        val = obj->if_contains("foo");
+        if( !val )
+            return nullptr;
+
+        array* arr = val->if_array();
+        if( !arr )
+            return nullptr;
+
+        return arr->if_contains(1);
+        //]
+    }();
+
+    value* elem2 = [&]() -> value*
+    {
+        //[snippet_pointer_3
+        error_code ec;
+        return jv.find_pointer("/one/foo/1", ec);
+        //]
+    }();
+
+    (void)elem1;
+    (void)elem2;
+    assert( elem1 == elem2 );
+}
+
 BOOST_STATIC_ASSERT(
     has_value_from<customer>::value);
 
@@ -840,6 +903,7 @@ public:
         usingArrays();
         usingObjects();
         usingStrings();
+        usingPointer();
 
         BOOST_TEST_PASS();
     }
@@ -848,5 +912,3 @@ public:
 TEST_SUITE(snippets_test, "boost.json.snippets");
 
 BOOST_JSON_NS_END
-
-#endif

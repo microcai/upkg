@@ -217,7 +217,7 @@
 <span class="keyword">bool</span>                                      <span class="identifier">isinf</span>      <span class="special">(</span><span class="keyword">const</span> <span class="emphasis"><em>number-or-expression-template-type</em></span><span class="special">&amp;);</span>
 <span class="keyword">bool</span>                                      <span class="identifier">isnan</span>      <span class="special">(</span><span class="keyword">const</span> <span class="emphasis"><em>number-or-expression-template-type</em></span><span class="special">&amp;);</span>
 <span class="keyword">bool</span>                                      <span class="identifier">isnormal</span>   <span class="special">(</span><span class="keyword">const</span> <span class="emphasis"><em>number-or-expression-template-type</em></span><span class="special">&amp;);</span>
-<span class="keyword">int</span>                                       <span class="identifier">signbit</span>    <span class="special">(</span><span class="keyword">const</span> <span class="emphasis"><em>number-or-expression-template-type</em></span><span class="special">&amp;);</span>
+<span class="keyword">bool</span>                                      <span class="identifier">signbit</span>    <span class="special">(</span><span class="keyword">const</span> <span class="emphasis"><em>number-or-expression-template-type</em></span><span class="special">&amp;);</span>
 
 <span class="keyword">bool</span>                                      <span class="identifier">isgreater</span>  <span class="special">(</span><span class="keyword">const</span> <span class="emphasis"><em>number-or-expression-template-type</em></span><span class="special">&amp;,</span> <span class="keyword">const</span> <span class="emphasis"><em>number-or-expression-template-type</em></span><span class="special">&amp;);</span>
 <span class="keyword">bool</span>                                      <span class="identifier">isgreaterequal</span><span class="special">(</span><span class="keyword">const</span> <span class="emphasis"><em>number-or-expression-template-type</em></span><span class="special">&amp;,</span> <span class="keyword">const</span> <span class="emphasis"><em>number-or-expression-template-type</em></span><span class="special">&amp;);</span>
@@ -433,6 +433,9 @@
 <p>
         Where the two args must either be arithmetic types, or types that are convertible
         to the two components of <code class="computeroutput"><span class="keyword">this</span></code>.
+        Rvalue forwarding overloads are provided so either one or both arguments
+        may be rvalue-references which will be moved into the result, if the backend
+        is able to make use of them.
       </p>
 <p>
         Finally, when the type has a variable precision, then there are constructors:
@@ -814,7 +817,7 @@
 <span class="keyword">bool</span>                                      <span class="identifier">isinf</span>      <span class="special">(</span><span class="keyword">const</span> <span class="emphasis"><em>number-or-expression-template-type</em></span><span class="special">&amp;);</span>
 <span class="keyword">bool</span>                                      <span class="identifier">isnan</span>      <span class="special">(</span><span class="keyword">const</span> <span class="emphasis"><em>number-or-expression-template-type</em></span><span class="special">&amp;);</span>
 <span class="keyword">bool</span>                                      <span class="identifier">isnormal</span>   <span class="special">(</span><span class="keyword">const</span> <span class="emphasis"><em>number-or-expression-template-type</em></span><span class="special">&amp;);</span>
-<span class="keyword">int</span>                                       <span class="identifier">signbit</span>    <span class="special">(</span><span class="keyword">const</span> <span class="emphasis"><em>number-or-expression-template-type</em></span><span class="special">&amp;);</span>
+<span class="keyword">bool</span>                                      <span class="identifier">signbit</span>    <span class="special">(</span><span class="keyword">const</span> <span class="emphasis"><em>number-or-expression-template-type</em></span><span class="special">&amp;);</span>
 
 <span class="keyword">bool</span>                                      <span class="identifier">isgreater</span>  <span class="special">(</span><span class="keyword">const</span> <span class="emphasis"><em>number-or-expression-template-type</em></span><span class="special">&amp;,</span> <span class="keyword">const</span> <span class="emphasis"><em>number-or-expression-template-type</em></span><span class="special">&amp;);</span>
 <span class="keyword">bool</span>                                      <span class="identifier">isgreaterequal</span><span class="special">(</span><span class="keyword">const</span> <span class="emphasis"><em>number-or-expression-template-type</em></span><span class="special">&amp;,</span> <span class="keyword">const</span> <span class="emphasis"><em>number-or-expression-template-type</em></span><span class="special">&amp;);</span>

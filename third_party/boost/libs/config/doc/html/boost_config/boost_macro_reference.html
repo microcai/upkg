@@ -2915,7 +2915,9 @@
               </td>
 <td>
                 <p>
-                  The standard library does not provide header &lt;codecvt&gt;.
+                  The standard library does not provide header &lt;codecvt&gt;. Note
+                  that this header is deprecated post C++17, and therefore the macro
+                  may be set as a result of the feature being deliberately removed.
                 </p>
               </td>
 </tr>
@@ -3805,6 +3807,19 @@
                 </p>
               </td>
 </tr>
+<tr>
+<td>
+                <p>
+                  <code class="computeroutput"><span class="identifier">BOOST_NULLPTR</span></code>
+                </p>
+              </td>
+<td>
+                <p>
+                  If <code class="computeroutput"><span class="identifier">BOOST_NO_CXX11_NULLPTR</span></code>
+                  is not defined (i.e. C++11 compliant compilers), expands to <code class="computeroutput"><span class="keyword">nullptr</span></code>, otherwise expands to <code class="computeroutput"><span class="number">0</span></code>.
+                </p>
+              </td>
+</tr>
 </tbody>
 </table></div>
 </div>
@@ -4222,6 +4237,19 @@
                 </p>
               </td>
 </tr>
+<tr>
+<td>
+                <p>
+                  <code class="computeroutput"><span class="identifier">BOOST_NO_CXX17_DEDUCTION_GUIDES</span></code>
+                </p>
+              </td>
+<td>
+                <p>
+                  The compiler does not support class template argument deduction
+                  (CTAD) guides.
+                </p>
+              </td>
+</tr>
 </tbody>
 </table></div>
 </div>
@@ -4356,7 +4384,7 @@
               </td>
 <td>
                 <p>
-                  The compiler does not support the header <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">format</span><span class="special">&gt;</span></code>.
+                  The compiler does not support the header <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">source_location</span><span class="special">&gt;</span></code>.
                 </p>
               </td>
 </tr>
@@ -4452,7 +4480,7 @@
               </td>
 <td>
                 <p>
-                  The compiler does not support the header <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">range</span><span class="special">&gt;</span></code>.
+                  The compiler does not support the header <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">ranges</span><span class="special">&gt;</span></code>.
                 </p>
               </td>
 </tr>
@@ -4489,6 +4517,18 @@
 <td>
                 <p>
                   The compiler does not support the header <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">semaphore</span><span class="special">&gt;</span></code>.
+                </p>
+              </td>
+</tr>
+<tr>
+<td>
+                <p>
+                  <code class="computeroutput"><span class="identifier">BOOST_NO_CXX20_HDR_VERSION</span></code>
+                </p>
+              </td>
+<td>
+                <p>
+                  The compiler does not support the header <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">version</span><span class="special">&gt;</span></code>.
                 </p>
               </td>
 </tr>
@@ -4587,6 +4627,19 @@
                 <p>
                   The standard library no longer supports atomic overloads for <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">shared_ptr</span></code>: use <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">atomic</span><span class="special">&lt;</span><span class="identifier">shared_ptr</span><span class="special">&lt;</span><span class="identifier">T</span><span class="special">&gt;&gt;</span></code>
                   instead.
+                </p>
+              </td>
+</tr>
+<tr>
+<td>
+                <p>
+                  <code class="computeroutput"><span class="identifier">BOOST_NO_CXX11_HDR_CODECVT</span></code>
+                </p>
+              </td>
+<td>
+                <p>
+                  The standard library no longer supports <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">codecvt</span><span class="special">&gt;</span></code>,
+                  there is as yet no replacement.
                 </p>
               </td>
 </tr>
@@ -5472,6 +5525,29 @@
 <td>
                 <p>
                   Defined to 1 if the compiler is the Clang compiler.
+                </p>
+              </td>
+</tr>
+<tr>
+<td>
+                <p>
+                  <code class="computeroutput"><span class="identifier">BOOST_CLANG_VERSION</span></code>
+                </p>
+              </td>
+<td>
+                <p>
+                  <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">config</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span></code>
+                </p>
+              </td>
+<td>
+                <p>
+                  Defined to the version of the Clang compiler, usually <code class="computeroutput"><span class="identifier">__clang_major__</span> <span class="special">*</span>
+                  <span class="number">10000</span> <span class="special">+</span>
+                  <span class="identifier">__clang_minor__</span> <span class="special">*</span>
+                  <span class="number">100</span> <span class="special">+</span>
+                  <span class="identifier">__clang_patchlevel__</span></code>.
+                  On Apple Clang, has a best-effort value reflecting the upstream
+                  version, rather than the Apple version.
                 </p>
               </td>
 </tr>

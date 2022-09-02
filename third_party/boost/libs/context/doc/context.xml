@@ -3382,12 +3382,39 @@
           <row>
             <entry>
               <para>
-                mips1
+                loongarch64
               </para>
             </entry>
             <entry>
               <para>
-                O32|ELF
+                SYSV|ELF
+              </para>
+            </entry>
+            <entry>
+              <para>
+                -
+              </para>
+            </entry>
+            <entry>
+              <para>
+                -
+              </para>
+            </entry>
+            <entry>
+              <para>
+                -
+              </para>
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <para>
+                mips
+              </para>
+            </entry>
+            <entry>
+              <para>
+                O32,N64|ELF
               </para>
             </entry>
             <entry>

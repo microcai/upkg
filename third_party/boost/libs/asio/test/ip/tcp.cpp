@@ -2,7 +2,7 @@
 // tcp.cpp
 // ~~~~~~~
 //
-// Copyright (c) 2003-2021 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2022 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -1338,14 +1338,14 @@ void test()
 BOOST_ASIO_TEST_SUITE
 (
   "ip/tcp",
-  BOOST_ASIO_TEST_CASE(ip_tcp_compile::test)
+  BOOST_ASIO_COMPILE_TEST_CASE(ip_tcp_compile::test)
   BOOST_ASIO_TEST_CASE(ip_tcp_runtime::test)
-  BOOST_ASIO_TEST_CASE(ip_tcp_socket_compile::test)
+  BOOST_ASIO_COMPILE_TEST_CASE(ip_tcp_socket_compile::test)
   BOOST_ASIO_TEST_CASE(ip_tcp_socket_runtime::test)
-  BOOST_ASIO_TEST_CASE(ip_tcp_acceptor_compile::test)
+  BOOST_ASIO_COMPILE_TEST_CASE(ip_tcp_acceptor_compile::test)
   BOOST_ASIO_TEST_CASE(ip_tcp_acceptor_runtime::test)
-  BOOST_ASIO_TEST_CASE(ip_tcp_resolver_compile::test)
-  BOOST_ASIO_TEST_CASE(ip_tcp_resolver_entry_compile::test)
-  BOOST_ASIO_TEST_CASE(ip_tcp_resolver_entry_compile::test)
+  BOOST_ASIO_COMPILE_TEST_CASE(ip_tcp_resolver_compile::test)
+  BOOST_ASIO_COMPILE_TEST_CASE(ip_tcp_resolver_entry_compile::test)
+  BOOST_ASIO_COMPILE_TEST_CASE(ip_tcp_resolver_entry_compile::test)
   BOOST_ASIO_COMPILE_TEST_CASE(ip_tcp_iostream_compile::test)
 )

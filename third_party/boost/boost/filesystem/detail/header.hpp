@@ -22,6 +22,8 @@
 #pragma warning(disable: 4100)
 // conditional expression is constant
 #pragma warning(disable: 4127)
+// function marked as __forceinline not inlined
+#pragma warning(disable: 4714)
 // decorated name length exceeded, name was truncated
 #pragma warning(disable: 4503)
 // 'X': This function or variable may be unsafe. Consider using Y instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
@@ -35,6 +37,8 @@
 #pragma GCC diagnostic push
 // unused parameter 'arg'
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+// unused function 'foo'
+#pragma GCC diagnostic ignored "-Wunused-function"
 
 #endif
 

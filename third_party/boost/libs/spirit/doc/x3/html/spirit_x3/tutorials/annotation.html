@@ -4,7 +4,7 @@
 <title>Annotations - Decorating the ASTs</title>
 <link rel="stylesheet" href="../../../../../../../doc/src/boostbook.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
-<link rel="home" href="../../index.html" title="Spirit X3 3.0.9">
+<link rel="home" href="../../index.html" title="Spirit X3 3.10">
 <link rel="up" href="../tutorials.html" title="Tutorials">
 <link rel="prev" href="minimal.html" title="X3 Program Structure">
 <link rel="next" href="rexpr.html" title="RExpressions - Recursive ASTs!">
@@ -154,6 +154,12 @@
         handlers have access to the AST, the iterators, and context. But, unlike
         semantic actions, <code class="computeroutput"><span class="identifier">on_success</span></code>
         handlers are cleanly separated from the actual grammar.
+      </p>
+<p>
+        <span class="bold"><strong>Note:</strong></span> an <code class="computeroutput"><span class="identifier">on_success</span></code>
+        handler recieves a pre-skipped iterator even when the rule definition disables
+        pre-skipping via <code class="computeroutput"><span class="identifier">no_skip</span></code>
+        directive.
       </p>
 <h5>
 <a name="spirit_x3.tutorials.annotation.h3"></a>

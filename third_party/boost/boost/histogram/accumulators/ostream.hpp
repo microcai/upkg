@@ -63,7 +63,8 @@ std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>&
 template <class CharT, class Traits, class U>
 std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>& os,
                                               const sum<U>& x) {
-  if (os.width() == 0) return os << "sum(" << x.large() << " + " << x.small() << ")";
+  if (os.width() == 0)
+    return os << "sum(" << x.large_part() << " + " << x.small_part() << ")";
   return detail::handle_nonzero_width(os, x);
 }
 
@@ -91,15 +92,6 @@ std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>&
               << x.variance() << ")";
   return detail::handle_nonzero_width(os, x);
 }
-
-#include <boost/histogram/detail/ignore_deprecation_warning_begin.hpp>
-template <class CharT, class Traits, class T>
-std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>& os,
-                                              const thread_safe<T>& x) {
-  os << static_cast<T>(x);
-  return os;
-}
-#include <boost/histogram/detail/ignore_deprecation_warning_end.hpp>
 
 } // namespace accumulators
 } // namespace histogram

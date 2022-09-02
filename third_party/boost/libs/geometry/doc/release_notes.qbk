@@ -6,8 +6,8 @@
   Copyright (c) 2009-2017 Mateusz Loskot <mateusz@loskot.net>, London, UK.
   Copyright (c) 2011-2017 Adam Wulkiewicz, Lodz, Poland.
 
-  This file was modified by Oracle on 2015-2021.
-  Modifications copyright (c) 2015-2021, Oracle and/or its affiliates.
+  This file was modified by Oracle on 2015-2022.
+  Modifications copyright (c) 2015-2022, Oracle and/or its affiliates.
   Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
   Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
   Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
@@ -18,6 +18,56 @@
 =============================================================================/]
 
 [section:release_notes Release Notes]
+
+[/=================]
+[heading Boost 1.79]
+[/=================]
+
+[*Major change]
+
+* [@https://github.com/boostorg/geometry/pull/977 977] Rescaling is turned off by default. This avoids many related bugs in set operations and buffer.
+
+[*Improvements]
+
+* [@https://github.com/boostorg/geometry/pull/923 923] Added algorithm closest_points for cartesian point/geometry.
+* [@https://github.com/boostorg/geometry/pull/939 939] Added algorithm closest_points for other coordinate systems and geometry combinations excl. boxes.
+* [@https://github.com/boostorg/geometry/pull/961 961] Added Web Mercator projection.
+* [@https://github.com/boostorg/geometry/pull/966 966] More efficient cartesian distance strategy used in simplify.
+
+[*Solved issues]
+
+* [@https://github.com/boostorg/geometry/issues/956 956] Result of simplify algorithm with incorrect closure.
+* [@https://github.com/boostorg/geometry/issues/962 962] Runtime error in R-tree deserialization due to load factor.
+* [@https://github.com/boostorg/geometry/issues/971 971] R-tree insertion time impacted by use of long double on ARM platforms.
+
+[*Bugfixes]
+
+* [@https://github.com/boostorg/geometry/pull/936 936] Envelope of polygon containing pole.
+* [@https://github.com/boostorg/geometry/pull/948 948] Spherical and geographic envelope for near meridian segments.
+* [@https://github.com/boostorg/geometry/pull/974 974] Spheroidal normalization utilities for NaN coordinates.
+* Various fixes in set operations and buffer.
+
+[/=================]
+[heading Boost 1.78]
+[/=================]
+
+[*Improvements]
+
+* [@https://github.com/boostorg/geometry/pull/894 894] Optimization and refactoring of rtree queries.
+* [@https://github.com/boostorg/geometry/pull/913 913] DynamicGeometry and GeometryCollection support in various algorithms (undocumented for now).
+* [@https://github.com/boostorg/geometry/pull/922 922] DynamicGeometry and GeometryCollection support in distance (undocumented for now).
+
+[*Solved issues]
+
+* [@https://github.com/boostorg/geometry/issues/867 867] Poor performance of rtree query iterator with nearest predicate for big k.
+* [@https://github.com/boostorg/geometry/issues/870 870] Compilation error in boost::geometry::self_turns.
+* [@https://github.com/boostorg/geometry/issues/896 896] Assertion failure in get_turns with BOOST_GEOMETRY_NO_ROBUSTNESS.
+
+[*Bugfixes]
+
+* [@https://github.com/boostorg/geometry/pull/906 906] Invalid result of buffer on macos-11 with clang-12.
+* [@https://github.com/boostorg/geometry/pull/921 921] Compilation errors with c++20 (various compilers) and gcc-5.
+* Various fixes in set operations and buffer.
 
 [/=================]
 [heading Boost 1.77]

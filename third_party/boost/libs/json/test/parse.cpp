@@ -22,10 +22,21 @@ BOOST_JSON_NS_BEGIN
 class parse_test
 {
 public:
-    void
-    good(string_view s)
+    bool hasLocation(std::error_code const&)
     {
-        error_code ec;
+        return true;
+    }
+
+    bool hasLocation(error_code const& ec)
+    {
+        return ec.has_location();
+    }
+
+    template <class ErrorCode>
+    void
+    good_impl(string_view s)
+    {
+        ErrorCode ec;
         auto jv = parse(s, ec);
         if(! BOOST_TEST(! ec))
             return;
@@ -33,12 +44,28 @@ public:
             serialize(jv) == s);
     }
 
+    template <class ErrorCode>
+    void
+    bad_impl(string_view s)
+    {
+        ErrorCode ec;
+        auto jv = parse(s, ec);
+        BOOST_TEST(ec);
+        BOOST_TEST(hasLocation(ec));
+    }
+
+    void
+    good(string_view s)
+    {
+        good_impl<error_code>(s);
+        good_impl<std::error_code>(s);
+    }
+
     void
     bad(string_view s)
     {
-        error_code ec;
-        auto jv = parse(s, ec);
-        BOOST_TEST(ec);
+        bad_impl<error_code>(s);
+        bad_impl<std::error_code>(s);
     }
 
     void
@@ -47,6 +74,8 @@ public:
         good("null");
         good("[1,2,3]");
         bad ("[1,2,3] #");
+        bad ("555415214748364655415E2147483646");
+        bad ("9.88874836020e-2147483640");
     }
 
     void
@@ -139,10 +168,22 @@ public:
     }
 
     void
+    testIssue726()
+    {
+        parse_options opt;
+        opt.allow_comments = true;
+        opt.allow_trailing_commas = true;
+        char const* text1 = "[ 123, //\n]";
+        value arr = parse(text1, {}, opt);
+        BOOST_TEST(arr == array{123});
+    }
+
+    void
     run()
     {
         testParse();
         testMemoryUsage();
+        testIssue726();
     }
 };
 

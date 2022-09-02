@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2003-2021 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+# Copyright (c) 2003-2022 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 #
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -42,8 +42,16 @@ project
 test-suite "asio-experimental" :
   [ run awaitable_operators.cpp ]
   [ run awaitable_operators.cpp : : : $(USE_SELECT) : awaitable_operators_select ]
-  [ run deferred.cpp ]
-  [ run deferred.cpp : : : $(USE_SELECT) : deferred_select ]
+  [ run basic_channel.cpp ]
+  [ run basic_channel.cpp : : : $(USE_SELECT) : basic_channel_select ]
+  [ run basic_concurrent_channel.cpp ]
+  [ run basic_concurrent_channel.cpp : : : $(USE_SELECT) : basic_concurrent_channel_select ]
+  [ run channel.cpp ]
+  [ run channel.cpp : : : $(USE_SELECT) : channel_select ]
+  [ run channel_traits.cpp ]
+  [ run channel_traits.cpp : : : $(USE_SELECT) : channel_traits_select ]
+  [ run concurrent_channel.cpp ]
+  [ run concurrent_channel.cpp : : : $(USE_SELECT) : concurrent_channel_select ]
   [ run promise.cpp ]
   [ run promise.cpp : : : $(USE_SELECT) : promise_select ]
   ;

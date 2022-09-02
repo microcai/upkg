@@ -1,17 +1,17 @@
 //  Copyright (c) 2009 Carl Barron
-// 
-//  Distributed under the Boost Software License, Version 1.0. (See accompanying 
+//
+//  Distributed under the Boost Software License, Version 1.0. (See accompanying
 //  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include <iostream>
-#include <sstream>
-
-#include <boost/detail/lightweight_test.hpp>
 #include <boost/spirit/include/lex.hpp>
 #include <boost/spirit/include/lex_lexertl.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_statement.hpp>
+#include <boost/phoenix/core.hpp>
+#include <boost/phoenix/operator.hpp>
+#include <boost/phoenix/statement.hpp>
+
+#include <boost/core/lightweight_test.hpp>
+#include <iostream>
+#include <sstream>
 
 namespace lex = boost::spirit::lex;
 namespace phoenix = boost::phoenix;
@@ -33,7 +33,7 @@ struct multi_tokens : lex::lexer<Lexer>
         a = "A";
         b = "B";
         c = "C";
-        this->self = 
+        this->self =
                 a [ ++phoenix::ref(level) ]
             |   b
             |   c [(
@@ -44,12 +44,12 @@ struct multi_tokens : lex::lexer<Lexer>
             ;
 
         d = ".";
-        this->self("in_dedenting") = 
-                d [ 
-                      if_(--phoenix::ref(level)) [ 
-                          _end = _start 
+        this->self("in_dedenting") =
+                d [
+                      if_(--phoenix::ref(level)) [
+                          _end = _start
                       ]
-                      .else_ [ 
+                      .else_ [
                           _state = "INITIAL"
                       ]
                   ]
@@ -75,7 +75,7 @@ struct dumper
     std::stringstream& strm;
 
     // silence MSVC warning C4512: assignment operator could not be generated
-    BOOST_DELETED_FUNCTION(dumper& operator= (dumper const&));
+    BOOST_DELETED_FUNCTION(dumper& operator= (dumper const&))
 };
 
 ///////////////////////////////////////////////////////////////////////////////

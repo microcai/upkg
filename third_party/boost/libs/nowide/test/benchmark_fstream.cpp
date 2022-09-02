@@ -1,11 +1,9 @@
 //
-//  Copyright (c) 2012 Artyom Beilis (Tonkikh)
-//  Copyright (c) 2019 - 2020 Alexander Grund
+// Copyright (c) 2012 Artyom Beilis (Tonkikh)
+// Copyright (c) 2019 - 2020 Alexander Grund
 //
-//  Distributed under the Boost Software License, Version 1.0. (See
-//  accompanying file LICENSE or copy at
-//  http://www.boost.org/LICENSE_1_0.txt)
-//
+// Distributed under the Boost Software License, Version 1.0.
+// https://www.boost.org/LICENSE_1_0.txt
 
 #define BOOST_NOWIDE_TEST_NO_MAIN
 
@@ -94,11 +92,11 @@ public:
     }
     void write(const char* buf, int size)
     {
-        TEST(std::fwrite(buf, 1, size, f_) == static_cast<size_t>(size));
+        TEST_EQ(std::fwrite(buf, 1, size, f_), static_cast<size_t>(size));
     }
     void read(char* buf, int size)
     {
-        TEST(std::fread(buf, 1, size, f_) == static_cast<size_t>(size));
+        TEST_EQ(std::fread(buf, 1, size, f_), static_cast<size_t>(size));
     }
     void rewind()
     {
@@ -202,7 +200,7 @@ perf_data test_io(const char* file, bool binary)
         std::cout << "  read block size " << std::setw(8) << block_size << " " << std::fixed << std::setprecision(3)
                   << speed << " MB/s" << std::endl;
     }
-    TEST(std::remove(file) == 0);
+    TEST_EQ(std::remove(file), 0);
     return results;
 }
 
@@ -249,8 +247,6 @@ void print_perf_data(const blocksize_to_performance& stdio_data,
 
 void test_perf(const char* file)
 {
-    perf_data nowide_data_txt2 = test_io_driver<io_fstream<nw::fstream>>(file, "std::fstream", false);
-    /*
     perf_data stdio_data = test_io_driver<io_stdio>(file, "stdio", true);
     perf_data std_data = test_io_driver<io_fstream<std::fstream>>(file, "std::fstream", true);
     perf_data nowide_data = test_io_driver<io_fstream<nw::fstream>>(file, "nowide::fstream", true);
@@ -265,7 +261,6 @@ void test_perf(const char* file)
     print_perf_data(stdio_data_txt.read, std_data_txt.read, nowide_data_txt.read);
     std::cout << "================== Write performance (text) ===================" << std::endl;
     print_perf_data(stdio_data_txt.write, std_data_txt.write, nowide_data_txt.write);
-    */
 }
 
 int main(int argc, char** argv)
@@ -282,7 +277,7 @@ int main(int argc, char** argv)
     try
     {
         test_perf(filename.c_str());
-    } catch(const std::runtime_error& err)
+    } catch(const std::exception& err)
     {
         std::cerr << "Benchmarking failed: " << err.what() << std::endl;
         return 1;

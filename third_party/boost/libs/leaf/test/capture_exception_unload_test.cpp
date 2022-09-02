@@ -1,10 +1,11 @@
-// Copyright (c) 2018-2021 Emil Dotchevski and Reverge Studios, Inc.
+// Copyright 2018-2022 Emil Dotchevski and Reverge Studios, Inc.
 
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include <boost/leaf/detail/config.hpp>
-#ifdef BOOST_LEAF_NO_EXCEPTIONS
+#include <boost/leaf/config.hpp>
+
+#if defined(BOOST_LEAF_NO_EXCEPTIONS) || !BOOST_LEAF_CFG_CAPTURE
 
 #include <iostream>
 
@@ -193,13 +194,13 @@ int main()
     test<info<1>, info<2>, info<3>>(
         []
         {
-            throw leaf::exception(info<1>{1}, info<3>{3}); // Derives from leaf::leaf::error_id
+            leaf::throw_exception(info<1>{1}, info<3>{3}); // Derives from leaf::leaf::error_id
         } );
     test<info<1>, info<2>, info<3>>(
         []
         {
             auto load = leaf::on_error( info<1>{1}, info<3>{3} );
-            throw leaf::exception(); // Derives from leaf::leaf::error_id
+            leaf::throw_exception(); // Derives from leaf::leaf::error_id
         } );
     test<info<1>, info<2>, info<3>>(
         []

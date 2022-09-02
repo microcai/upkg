@@ -49,6 +49,7 @@
 #define BOOST_SYSTEM_NO_DEPRECATED
 #endif
 
+#include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/exception.hpp>
 
@@ -72,9 +73,65 @@ using boost::prior;
 #define BOOST_DIR_SEP "/"
 #endif
 
+#if BOOST_FILESYSTEM_VERSION == 3
+#define BOOST_FILESYSTEM_V3_TRAILING_DOT "."
+#else
+#define BOOST_FILESYSTEM_V3_TRAILING_DOT ""
+#endif
+
 #define PATH_TEST_EQ(a, b) check(a, b, __FILE__, __LINE__)
 
 namespace {
+
+class derived_from_path :
+    public fs::path
+{
+public:
+    derived_from_path() {}
+    derived_from_path(derived_from_path const& that) : fs::path(static_cast< fs::path const& >(that)) {}
+    template< typename T >
+    derived_from_path(T const& that) : fs::path(that) {}
+
+    derived_from_path& operator= (derived_from_path const& that)
+    {
+        *static_cast< fs::path* >(this) = that;
+        return *this;
+    }
+    template< typename T >
+    derived_from_path& operator= (T const& that)
+    {
+        *static_cast< fs::path* >(this) = that;
+        return *this;
+    }
+};
+
+class convertible_to_path
+{
+private:
+    fs::path m_path;
+
+public:
+    convertible_to_path() {}
+    convertible_to_path(convertible_to_path const& that) : m_path(that.m_path) {}
+    template< typename T >
+    convertible_to_path(T const& that) : m_path(that) {}
+
+    convertible_to_path& operator= (convertible_to_path const& that)
+    {
+        m_path = that.m_path;
+        return *this;
+    }
+    template< typename T >
+    convertible_to_path& operator= (T const& that)
+    {
+        m_path = that;
+        return *this;
+    }
+
+    operator fs::path() const { return m_path; }
+};
+
+
 std::string platform(BOOST_PLATFORM);
 
 void check(const fs::path& source, const std::string& expected, const char* file, int line)
@@ -215,10 +272,10 @@ void iterator_tests()
     BOOST_TEST(itr != itr_ck.end());
     PATH_TEST_EQ(*++itr, "bar");
     BOOST_TEST(itr != itr_ck.end());
-    PATH_TEST_EQ(*++itr, ".");
+    PATH_TEST_EQ(*++itr, BOOST_FILESYSTEM_V3_TRAILING_DOT);
     BOOST_TEST(itr != itr_ck.end()); // verify the . isn't also seen as end()
     BOOST_TEST(++itr == itr_ck.end());
-    PATH_TEST_EQ(*--itr, ".");
+    PATH_TEST_EQ(*--itr, BOOST_FILESYSTEM_V3_TRAILING_DOT);
     PATH_TEST_EQ(*--itr, "bar");
     PATH_TEST_EQ(*--itr, "foo");
     PATH_TEST_EQ(*--itr, "/");
@@ -230,10 +287,10 @@ void iterator_tests()
     PATH_TEST_EQ(itr->string(), "/");
     PATH_TEST_EQ(*++itr, "f");
     PATH_TEST_EQ(*++itr, "b");
-    PATH_TEST_EQ(*++itr, ".");
+    PATH_TEST_EQ(*++itr, BOOST_FILESYSTEM_V3_TRAILING_DOT);
     BOOST_TEST(itr != itr_ck.end()); // verify the . isn't also seen as end()
     BOOST_TEST(++itr == itr_ck.end());
-    PATH_TEST_EQ(*--itr, ".");
+    PATH_TEST_EQ(*--itr, BOOST_FILESYSTEM_V3_TRAILING_DOT);
     PATH_TEST_EQ(*--itr, "b");
     PATH_TEST_EQ(*--itr, "f");
     PATH_TEST_EQ(*--itr, "/");
@@ -246,10 +303,10 @@ void iterator_tests()
     itr_begin = itr = itr_ck.begin();
     PATH_TEST_EQ(*itr, "a");
     PATH_TEST_EQ(*++itr, "b");
-    PATH_TEST_EQ(*++itr, ".");
+    PATH_TEST_EQ(*++itr, BOOST_FILESYSTEM_V3_TRAILING_DOT);
     BOOST_TEST(itr != itr_ck.end()); // verify the . isn't also seen as end()
     BOOST_TEST(++itr == itr_ck.end());
-    PATH_TEST_EQ(*--itr, ".");
+    PATH_TEST_EQ(*--itr, BOOST_FILESYSTEM_V3_TRAILING_DOT);
     PATH_TEST_EQ(*--itr, "b");
     PATH_TEST_EQ(*--itr, "a");
     BOOST_TEST(itr == itr_begin);
@@ -277,9 +334,9 @@ void iterator_tests()
     PATH_TEST_EQ(itr->string(), "//foo");
     PATH_TEST_EQ(*++itr, "/");
     PATH_TEST_EQ(*++itr, "bar");
-    PATH_TEST_EQ(*++itr, ".");
+    PATH_TEST_EQ(*++itr, BOOST_FILESYSTEM_V3_TRAILING_DOT);
     BOOST_TEST(++itr == itr_ck.end());
-    PATH_TEST_EQ(*--itr, ".");
+    PATH_TEST_EQ(*--itr, BOOST_FILESYSTEM_V3_TRAILING_DOT);
     PATH_TEST_EQ(*--itr, "bar");
     PATH_TEST_EQ(*--itr, "/");
     PATH_TEST_EQ(*--itr, "//foo");
@@ -291,9 +348,9 @@ void iterator_tests()
     PATH_TEST_EQ(itr->string(), "/");
     PATH_TEST_EQ(*++itr, "foo");
     PATH_TEST_EQ(*++itr, "bar");
-    PATH_TEST_EQ(*++itr, ".");
+    PATH_TEST_EQ(*++itr, BOOST_FILESYSTEM_V3_TRAILING_DOT);
     BOOST_TEST(++itr == itr_ck.end());
-    PATH_TEST_EQ(*--itr, ".");
+    PATH_TEST_EQ(*--itr, BOOST_FILESYSTEM_V3_TRAILING_DOT);
     PATH_TEST_EQ(*--itr, "bar");
     PATH_TEST_EQ(*--itr, "foo");
     PATH_TEST_EQ(*--itr, "/");
@@ -380,9 +437,9 @@ void iterator_tests()
         PATH_TEST_EQ(itr->string(), "/");
         PATH_TEST_EQ(*++itr, "foo");
         PATH_TEST_EQ(*++itr, "bar");
-        PATH_TEST_EQ(*++itr, ".");
+        PATH_TEST_EQ(*++itr, BOOST_FILESYSTEM_V3_TRAILING_DOT);
         BOOST_TEST(++itr == itr_ck.end());
-        PATH_TEST_EQ(*--itr, ".");
+        PATH_TEST_EQ(*--itr, BOOST_FILESYSTEM_V3_TRAILING_DOT);
         PATH_TEST_EQ(*--itr, "bar");
         PATH_TEST_EQ(*--itr, "foo");
         PATH_TEST_EQ(*--itr, "/");
@@ -401,9 +458,9 @@ void iterator_tests()
         itr_begin = itr = itr_ck.begin();
         BOOST_TEST(*itr == std::string("c:"));
         BOOST_TEST(*++itr == std::string("foo"));
-        BOOST_TEST(*++itr == std::string("."));
+        BOOST_TEST(*++itr == std::string(BOOST_FILESYSTEM_V3_TRAILING_DOT));
         BOOST_TEST(++itr == itr_ck.end());
-        BOOST_TEST(*--itr == std::string("."));
+        BOOST_TEST(*--itr == std::string(BOOST_FILESYSTEM_V3_TRAILING_DOT));
         BOOST_TEST(*--itr == std::string("foo"));
         BOOST_TEST(*--itr == std::string("c:"));
         BOOST_TEST(itr == itr_begin);
@@ -515,6 +572,16 @@ void non_member_tests()
     // probe operator /
     PATH_TEST_EQ(path("") / ".", ".");
     PATH_TEST_EQ(path("") / "..", "..");
+#if BOOST_FILESYSTEM_VERSION == 3
+    PATH_TEST_EQ(path("/") / "/", "//");
+    PATH_TEST_EQ(path("/") / "/foo", "//foo");
+    PATH_TEST_EQ(path("/foo") / "/bar", "/foo/bar");
+#else
+    PATH_TEST_EQ(path("/") / "/", "/");
+    PATH_TEST_EQ(path("/") / "/foo", "/foo");
+    PATH_TEST_EQ(path("/foo") / "/bar", "/bar");
+#endif
+
     if (platform == "Windows")
     {
         BOOST_TEST(path("foo\\bar") == "foo/bar");
@@ -524,11 +591,15 @@ void non_member_tests()
         BOOST_TEST((b / as).native() == path("b\\a").native());
         BOOST_TEST((b / acs).native() == path("b\\a").native());
         PATH_TEST_EQ(path("a") / "b", "a\\b");
-        PATH_TEST_EQ(path("..") / "", "..");
         PATH_TEST_EQ(path("foo") / path("bar"), "foo\\bar");                // path arg
         PATH_TEST_EQ(path("foo") / "bar", "foo\\bar");                      // const char* arg
         PATH_TEST_EQ(path("foo") / path("woo/bar").filename(), "foo\\bar"); // const std::string & arg
         PATH_TEST_EQ("foo" / path("bar"), "foo\\bar");
+#if BOOST_FILESYSTEM_VERSION == 3
+        PATH_TEST_EQ(path("..") / "", "..");
+#else
+        PATH_TEST_EQ(path("..") / "", "..\\");
+#endif
         PATH_TEST_EQ(path("..") / "..", "..\\..");
         PATH_TEST_EQ(path("/") / "..", "/..");
         PATH_TEST_EQ(path("/..") / "..", "/..\\..");
@@ -562,6 +633,21 @@ void non_member_tests()
         PATH_TEST_EQ(path(".") / "." / "..", ".\\.\\..");
         PATH_TEST_EQ(path(".") / ".." / ".", ".\\..\\.");
         PATH_TEST_EQ(path("..") / "." / ".", "..\\.\\.");
+
+#if BOOST_FILESYSTEM_VERSION == 3
+        PATH_TEST_EQ(path("\\\\net1\\foo") / "\\\\net2\\bar", "\\\\net1\\foo\\\\net2\\bar");
+        PATH_TEST_EQ(path("\\\\net1\\foo") / "\\bar", "\\\\net1\\foo\\bar");
+        PATH_TEST_EQ(path("c:\\foo") / "d:\\bar", "c:\\foo\\d:\\bar");
+        PATH_TEST_EQ(path("c:\\foo") / "\\bar", "c:\\foo\\bar");
+        PATH_TEST_EQ(path("c:foo") / "\\bar", "c:foo\\bar");
+#else
+        PATH_TEST_EQ(path("\\\\net1\\foo") / "\\\\net2\\bar", "\\\\net2\\bar");
+        PATH_TEST_EQ(path("\\\\net1\\foo") / "\\bar", "\\\\net1\\bar");
+        PATH_TEST_EQ(path("c:\\foo") / "d:\\bar", "d:\\bar");
+        PATH_TEST_EQ(path("c:\\foo") / "\\bar", "c:\\bar");
+        PATH_TEST_EQ(path("c:foo") / "\\bar", "c:\\bar");
+#endif
+        PATH_TEST_EQ(path("c:foo") / "bar", "c:foo\\bar");
     }
     else // POSIX
     {
@@ -571,12 +657,16 @@ void non_member_tests()
         PATH_TEST_EQ(b / as, "b/a");
         PATH_TEST_EQ(b / acs, "b/a");
         PATH_TEST_EQ(path("a") / "b", "a/b");
-        PATH_TEST_EQ(path("..") / "", "..");
         PATH_TEST_EQ(path("") / "..", "..");
         PATH_TEST_EQ(path("foo") / path("bar"), "foo/bar");                // path arg
         PATH_TEST_EQ(path("foo") / "bar", "foo/bar");                      // const char* arg
         PATH_TEST_EQ(path("foo") / path("woo/bar").filename(), "foo/bar"); // const std::string & arg
         PATH_TEST_EQ("foo" / path("bar"), "foo/bar");
+#if BOOST_FILESYSTEM_VERSION == 3
+        PATH_TEST_EQ(path("..") / "", "..");
+#else
+        PATH_TEST_EQ(path("..") / "", "../");
+#endif
         PATH_TEST_EQ(path("..") / "..", "../..");
         PATH_TEST_EQ(path("/") / "..", "/..");
         PATH_TEST_EQ(path("/..") / "..", "/../..");
@@ -610,6 +700,15 @@ void non_member_tests()
         PATH_TEST_EQ(path(".") / "." / "..", "././..");
         PATH_TEST_EQ(path(".") / ".." / ".", "./../.");
         PATH_TEST_EQ(path("..") / "." / ".", ".././.");
+
+#if BOOST_FILESYSTEM_VERSION == 3
+        PATH_TEST_EQ(path("//net1/foo") / "//net2/bar", "//net1/foo//net2/bar");
+        PATH_TEST_EQ(path("//net1/foo") / "/bar", "//net1/foo/bar");
+#else
+        PATH_TEST_EQ(path("//net1/foo") / "//net2/bar", "//net2/bar");
+        PATH_TEST_EQ(path("//net1/foo") / "/bar", "/bar");
+#endif
+        PATH_TEST_EQ(path("//net1/foo") / "bar", "//net1/foo/bar");
     }
 
     // probe operator <
@@ -648,7 +747,11 @@ void non_member_tests()
     // verify compare is actually lexicographical
     BOOST_TEST(path("a/b") < path("a.b"));
     BOOST_TEST(path("a/b") == path("a///b"));
+#if BOOST_FILESYSTEM_VERSION == 3
     BOOST_TEST(path("a/b/") == path("a/b/."));
+#else
+    BOOST_TEST(path("a/b/") != path("a/b/."));
+#endif
     BOOST_TEST(path("a/b") != path("a/b/"));
 
     // make sure the derivative operators also work
@@ -815,7 +918,7 @@ void query_and_decomposition_tests()
     BOOST_TEST(path("..").parent_path() == "");
     BOOST_TEST(path("/foo/bar.txt").filename() == "bar.txt");
     BOOST_TEST(path("/foo/bar").filename() == "bar");
-    BOOST_TEST(path("/foo/bar/").filename() == ".");
+    BOOST_TEST(path("/foo/bar/").filename() == BOOST_FILESYSTEM_V3_TRAILING_DOT);
 #if BOOST_FILESYSTEM_VERSION == 3
     BOOST_TEST(path("/").filename() == "/");
 #else
@@ -1061,8 +1164,8 @@ void query_and_decomposition_tests()
     PATH_TEST_EQ(p.relative_path().string(), "foo/");
     PATH_TEST_EQ(p.parent_path().string(), "/foo");
     PATH_TEST_EQ(q.remove_filename().string(), p.parent_path().string());
-    PATH_TEST_EQ(p.filename(), ".");
-    PATH_TEST_EQ(p.stem(), ".");
+    PATH_TEST_EQ(p.filename(), BOOST_FILESYSTEM_V3_TRAILING_DOT);
+    PATH_TEST_EQ(p.stem(), BOOST_FILESYSTEM_V3_TRAILING_DOT);
     PATH_TEST_EQ(p.extension(), "");
     PATH_TEST_EQ(p.root_name(), "");
     PATH_TEST_EQ(p.root_directory(), "/");
@@ -1071,8 +1174,13 @@ void query_and_decomposition_tests()
     BOOST_TEST(!p.has_root_name());
     BOOST_TEST(p.has_root_directory());
     BOOST_TEST(p.has_relative_path());
+#if BOOST_FILESYSTEM_VERSION == 3
     BOOST_TEST(p.has_filename());
     BOOST_TEST(p.has_stem());
+#else
+    BOOST_TEST(!p.has_filename());
+    BOOST_TEST(!p.has_stem());
+#endif
     BOOST_TEST(!p.has_extension());
     BOOST_TEST(p.has_parent_path());
     if (platform == "POSIX")
@@ -1934,15 +2042,27 @@ void construction_tests()
 
 //  append_tests  --------------------------------------------------------------------//
 
-void append_test_aux(const path& p, const std::string& s, const std::string& expect)
-{
-    PATH_TEST_EQ((p / path(s)).string(), expect);
-    PATH_TEST_EQ((p / s.c_str()).string(), expect);
-    PATH_TEST_EQ((p / s).string(), expect);
-    path x(p);
-    x.append(s.begin(), s.end());
-    PATH_TEST_EQ(x.string(), expect);
-}
+#define APPEND_TEST(pth, appnd, expected)\
+    {\
+        const path p(pth);\
+        const std::string s(appnd);\
+        PATH_TEST_EQ(p / appnd, expected);\
+        PATH_TEST_EQ((p / path(s)).string(), expected);\
+        PATH_TEST_EQ((p / s.c_str()).string(), expected);\
+        PATH_TEST_EQ((p / s).string(), expected);\
+        path p1(p);\
+        p1 /= appnd;\
+        PATH_TEST_EQ(p1, expected);\
+        path p2(p);\
+        p2 /= derived_from_path(appnd);\
+        PATH_TEST_EQ(p2, expected);\
+        path p3(p);\
+        p3 /= convertible_to_path(appnd);\
+        PATH_TEST_EQ(p3, expected);\
+        path p4(p);\
+        p4.append(s.begin(), s.end());\
+        PATH_TEST_EQ(p4.string(), expected);\
+    }
 
 void append_tests()
 {
@@ -1965,70 +2085,73 @@ void append_tests()
     //for (int i = 0; i < sizeof(x)/sizeof(char*); ++i)
     //  for (int j = 0; j < sizeof(y)/sizeof(char*); ++j)
     //  {
-    //    std::cout << "\n    PATH_TEST_EQ(path(\"" << x[i] << "\") / \"" << y[j] << "\", \""
-    //              << path(x[i]) / y[j] << "\");\n";
-    //    std::cout << "    append_test_aux(\"" << x[i] << "\", \"" << y[j] << "\", \""
+    //    std::cout << "    APPEND_TEST(\"" << x[i] << "\", \"" << y[j] << "\", \""
     //              << path(x[i]) / y[j] << "\");\n";
     //  }
 
-    PATH_TEST_EQ(path("") / "", "");
-    append_test_aux("", "", "");
+    APPEND_TEST("", "", "");
+    APPEND_TEST("", "/", "/");
+    APPEND_TEST("", "bar", "bar");
+    APPEND_TEST("", "/bar", "/bar");
 
-    PATH_TEST_EQ(path("") / "/", "/");
-    append_test_aux("", "/", "/");
+    APPEND_TEST("/", "", "/");
+#if BOOST_FILESYSTEM_VERSION == 3
+    APPEND_TEST("/", "/", "//");
+#else
+    APPEND_TEST("/", "/", "/");
+#endif
+    APPEND_TEST("/", "bar", "/bar");
+#if BOOST_FILESYSTEM_VERSION == 3
+    APPEND_TEST("/", "/bar", "//bar");
+#else
+    APPEND_TEST("/", "/bar", "/bar");
+#endif
 
-    PATH_TEST_EQ(path("") / "bar", "bar");
-    append_test_aux("", "bar", "bar");
+#if BOOST_FILESYSTEM_VERSION == 3
+    APPEND_TEST("foo", "/", "foo/");
+#else
+    APPEND_TEST("foo", "/", "/");
+#endif
+#if BOOST_FILESYSTEM_VERSION == 3
+    APPEND_TEST("foo", "/bar", "foo/bar");
+#else
+    APPEND_TEST("foo", "/bar", "/bar");
+#endif
 
-    PATH_TEST_EQ(path("") / "/bar", "/bar");
-    append_test_aux("", "/bar", "/bar");
-
-    PATH_TEST_EQ(path("/") / "", "/");
-    append_test_aux("/", "", "/");
-
-    PATH_TEST_EQ(path("/") / "/", "//");
-    append_test_aux("/", "/", "//");
-
-    PATH_TEST_EQ(path("/") / "bar", "/bar");
-    append_test_aux("/", "bar", "/bar");
-
-    PATH_TEST_EQ(path("/") / "/bar", "//bar");
-    append_test_aux("/", "/bar", "//bar");
-
-    PATH_TEST_EQ(path("foo") / "", "foo");
-    append_test_aux("foo", "", "foo");
-
-    PATH_TEST_EQ(path("foo") / "/", "foo/");
-    append_test_aux("foo", "/", "foo/");
-
-    PATH_TEST_EQ(path("foo") / "/bar", "foo/bar");
-    append_test_aux("foo", "/bar", "foo/bar");
-
-    PATH_TEST_EQ(path("foo/") / "", "foo/");
-    append_test_aux("foo/", "", "foo/");
-
-    PATH_TEST_EQ(path("foo/") / "/", "foo//");
-    append_test_aux("foo/", "/", "foo//");
-
-    PATH_TEST_EQ(path("foo/") / "bar", "foo/bar");
-    append_test_aux("foo/", "bar", "foo/bar");
+    APPEND_TEST("foo/", "", "foo/");
+#if BOOST_FILESYSTEM_VERSION == 3
+    APPEND_TEST("foo/", "/", "foo//");
+#else
+    APPEND_TEST("foo/", "/", "/");
+#endif
+    APPEND_TEST("foo/", "bar", "foo/bar");
 
     if (platform == "Windows")
     {
-        PATH_TEST_EQ(path("foo") / "bar", "foo\\bar");
-        append_test_aux("foo", "bar", "foo\\bar");
+#if BOOST_FILESYSTEM_VERSION == 3
+        APPEND_TEST("foo", "", "foo");
+#else
+        APPEND_TEST("foo", "", "foo\\");
+#endif
+        APPEND_TEST("foo", "bar", "foo\\bar");
 
-        PATH_TEST_EQ(path("foo\\") / "\\bar", "foo\\\\bar");
-        append_test_aux("foo\\", "\\bar", "foo\\\\bar");
+#if BOOST_FILESYSTEM_VERSION == 3
+        APPEND_TEST("foo\\", "\\bar", "foo\\\\bar");
+#else
+        APPEND_TEST("foo\\", "\\bar", "\\bar");
+#endif
 
         // hand created test case specific to Windows
-        PATH_TEST_EQ(path("c:") / "bar", "c:bar");
-        append_test_aux("c:", "bar", "c:bar");
+        APPEND_TEST("c:", "bar", "c:bar");
     }
     else
     {
-        PATH_TEST_EQ(path("foo") / "bar", "foo/bar");
-        append_test_aux("foo", "bar", "foo/bar");
+#if BOOST_FILESYSTEM_VERSION == 3
+        APPEND_TEST("foo", "", "foo");
+#else
+        APPEND_TEST("foo", "", "foo/");
+#endif
+        APPEND_TEST("foo", "bar", "foo/bar");
     }
 
     // ticket #6819
@@ -2047,11 +2170,67 @@ void append_tests()
     BOOST_TEST_EQ(p6819, path("ab"));
 }
 
-//  self_assign_and_append_tests  ------------------------------------------------------//
+//  concat_tests  --------------------------------------------------------------------//
 
-void self_assign_and_append_tests()
+#define CONCAT_TEST(pth, appnd, expected)\
+    {\
+        const path p(pth);\
+        const std::string s(appnd);\
+        path p1(p);\
+        p1 += appnd;\
+        PATH_TEST_EQ(p1.string(), expected);\
+        path p2(p);\
+        p2 += path(appnd);\
+        PATH_TEST_EQ(p2.string(), expected);\
+        path p3(p);\
+        p3 += s;\
+        PATH_TEST_EQ(p3.string(), expected);\
+        path p4(p);\
+        p4 += s.c_str();\
+        PATH_TEST_EQ(p4.string(), expected);\
+        path p5(p);\
+        p5 += derived_from_path(appnd);\
+        PATH_TEST_EQ(p5, expected);\
+        path p6(p);\
+        p6 += convertible_to_path(appnd);\
+        PATH_TEST_EQ(p6, expected);\
+        path p7(p);\
+        p7.concat(s.begin(), s.end());\
+        PATH_TEST_EQ(p7.string(), expected);\
+    }
+
+void concat_tests()
 {
-    std::cout << "self_assign_and_append_tests..." << std::endl;
+    std::cout << "concat_tests..." << std::endl;
+
+    CONCAT_TEST("", "", "");
+    CONCAT_TEST("", "/", "/");
+    CONCAT_TEST("", "bar", "bar");
+    CONCAT_TEST("", "/bar", "/bar");
+
+    CONCAT_TEST("/", "", "/");
+    CONCAT_TEST("/", "/", "//");
+    CONCAT_TEST("/", "bar", "/bar");
+    CONCAT_TEST("/", "/bar", "//bar");
+
+    CONCAT_TEST("foo", "/", "foo/");
+    CONCAT_TEST("foo", "/bar", "foo/bar");
+
+    CONCAT_TEST("foo/", "", "foo/");
+    CONCAT_TEST("foo/", "/", "foo//");
+    CONCAT_TEST("foo/", "bar", "foo/bar");
+
+    CONCAT_TEST("foo", "", "foo");
+    CONCAT_TEST("foo", "bar", "foobar");
+    CONCAT_TEST("foo\\", "\\bar", "foo\\\\bar");
+    CONCAT_TEST("c:", "bar", "c:bar");
+}
+
+//  self_assign_append_concat_tests  -------------------------------------------------//
+
+void self_assign_append_concat_tests()
+{
+    std::cout << "self_assign_append_concat_tests..." << std::endl;
 
     path p;
 
@@ -2086,6 +2265,21 @@ void self_assign_and_append_tests()
 
     p = "snafubar";
     PATH_TEST_EQ(p.append(p.c_str() + 5, p.c_str() + 7), "snafubar" BOOST_DIR_SEP "ba");
+
+    p = "snafubar";
+    p += p;
+    PATH_TEST_EQ(p, "snafubarsnafubar");
+
+    p = "snafubar";
+    p += p.c_str();
+    PATH_TEST_EQ(p, "snafubarsnafubar");
+
+    p = "snafubar";
+    p.concat(p.c_str(), path::codecvt());
+    PATH_TEST_EQ(p, "snafubarsnafubar");
+
+    p = "snafubar";
+    PATH_TEST_EQ(p.concat(p.c_str() + 5, p.c_str() + 7), "snafubarba");
 }
 
 //  name_function_tests  -------------------------------------------------------------//
@@ -2236,11 +2430,11 @@ void lexically_normal_tests()
     PATH_TEST_EQ(path("///").lexically_normal().generic_path(), "/");
     PATH_TEST_EQ(path("f").lexically_normal().generic_path(), "f");
     PATH_TEST_EQ(path("foo").lexically_normal().generic_path(), "foo");
-    PATH_TEST_EQ(path("foo/").lexically_normal().generic_path(), "foo/.");
-    PATH_TEST_EQ(path("f/").lexically_normal().generic_path(), "f/.");
+    PATH_TEST_EQ(path("foo/").lexically_normal().generic_path(), "foo/" BOOST_FILESYSTEM_V3_TRAILING_DOT);
+    PATH_TEST_EQ(path("f/").lexically_normal().generic_path(), "f/" BOOST_FILESYSTEM_V3_TRAILING_DOT);
     PATH_TEST_EQ(path("/foo").lexically_normal().generic_path(), "/foo");
     PATH_TEST_EQ(path("/./foo").lexically_normal().generic_path(), "/foo");
-    PATH_TEST_EQ(path("/./foo/.").lexically_normal().generic_path(), "/foo/.");
+    PATH_TEST_EQ(path("/./foo/.").lexically_normal().generic_path(), "/foo/" BOOST_FILESYSTEM_V3_TRAILING_DOT);
     PATH_TEST_EQ(path("foo/bar").lexically_normal().generic_path(), "foo/bar");
     PATH_TEST_EQ(path("..").lexically_normal().generic_path(), "..");
     PATH_TEST_EQ(path("../..").lexically_normal().generic_path(), "../..");
@@ -2251,30 +2445,38 @@ void lexically_normal_tests()
     PATH_TEST_EQ(path("foo/../").lexically_normal().generic_path(), ".");
     PATH_TEST_EQ((path("foo") / "..").lexically_normal().generic_path(), ".");
     PATH_TEST_EQ(path("foo/...").lexically_normal().generic_path(), "foo/...");
-    PATH_TEST_EQ(path("foo/.../").lexically_normal().generic_path(), "foo/.../.");
+    PATH_TEST_EQ(path("foo/.../").lexically_normal().generic_path(), "foo/.../" BOOST_FILESYSTEM_V3_TRAILING_DOT);
     PATH_TEST_EQ(path("foo/..bar").lexically_normal().generic_path(), "foo/..bar");
     PATH_TEST_EQ(path("../f").lexically_normal().generic_path(), "../f");
     PATH_TEST_EQ(path("/../f").lexically_normal().generic_path(), "/../f");
     PATH_TEST_EQ(path("f/..").lexically_normal().generic_path(), ".");
     PATH_TEST_EQ((path("f") / "..").lexically_normal().generic_path(), ".");
     PATH_TEST_EQ(path("foo/../..").lexically_normal().generic_path(), "..");
+#if BOOST_FILESYSTEM_VERSION == 3
     PATH_TEST_EQ(path("foo/../../").lexically_normal().generic_path(), "../.");
+#else
+    PATH_TEST_EQ(path("foo/../../").lexically_normal().generic_path(), "..");
+#endif
     PATH_TEST_EQ(path("foo/../../..").lexically_normal().generic_path(), "../..");
+#if BOOST_FILESYSTEM_VERSION == 3
     PATH_TEST_EQ(path("foo/../../../").lexically_normal().generic_path(), "../../.");
+#else
+    PATH_TEST_EQ(path("foo/../../../").lexically_normal().generic_path(), "../..");
+#endif
     PATH_TEST_EQ(path("foo/../bar").lexically_normal().generic_path(), "bar");
-    PATH_TEST_EQ(path("foo/../bar/").lexically_normal().generic_path(), "bar/.");
+    PATH_TEST_EQ(path("foo/../bar/").lexically_normal().generic_path(), "bar/" BOOST_FILESYSTEM_V3_TRAILING_DOT);
     PATH_TEST_EQ(path("foo/bar/..").lexically_normal().generic_path(), "foo");
     PATH_TEST_EQ(path("foo/./bar/..").lexically_normal().generic_path(), "foo");
     std::cout << path("foo/./bar/..").lexically_normal() << std::endl; // outputs "foo"
-    PATH_TEST_EQ(path("foo/bar/../").lexically_normal().generic_path(), "foo/.");
-    PATH_TEST_EQ(path("foo/./bar/../").lexically_normal().generic_path(), "foo/.");
-    std::cout << path("foo/./bar/../").lexically_normal() << std::endl; // POSIX: "foo/.", Windows: "foo\."
+    PATH_TEST_EQ(path("foo/bar/../").lexically_normal().generic_path(), "foo/" BOOST_FILESYSTEM_V3_TRAILING_DOT);
+    PATH_TEST_EQ(path("foo/./bar/../").lexically_normal().generic_path(), "foo/" BOOST_FILESYSTEM_V3_TRAILING_DOT);
+    std::cout << path("foo/./bar/../").lexically_normal() << std::endl; // POSIX: "foo/", Windows: "foo\" (with a trailing dot for v3)
     PATH_TEST_EQ(path("foo/bar/../..").lexically_normal().generic_path(), ".");
     PATH_TEST_EQ(path("foo/bar/../../").lexically_normal().generic_path(), ".");
     PATH_TEST_EQ(path("foo/bar/../blah").lexically_normal().generic_path(), "foo/blah");
     PATH_TEST_EQ(path("f/../b").lexically_normal().generic_path(), "b");
     PATH_TEST_EQ(path("f/b/..").lexically_normal().generic_path(), "f");
-    PATH_TEST_EQ(path("f/b/../").lexically_normal().generic_path(), "f/.");
+    PATH_TEST_EQ(path("f/b/../").lexically_normal().generic_path(), "f/" BOOST_FILESYSTEM_V3_TRAILING_DOT);
     PATH_TEST_EQ(path("f/b/../a").lexically_normal().generic_path(), "f/a");
     PATH_TEST_EQ(path("foo/bar/blah/../..").lexically_normal().generic_path(), "foo");
     PATH_TEST_EQ(path("foo/bar/blah/../../bletch").lexically_normal().generic_path(), "foo/bletch");
@@ -2283,24 +2485,24 @@ void lexically_normal_tests()
     PATH_TEST_EQ(path("//..net").lexically_normal().generic_path(), "//..net");
     PATH_TEST_EQ(path("//net/..").lexically_normal().generic_path(), "//net/..");
     PATH_TEST_EQ(path("//net/foo").lexically_normal().generic_path(), "//net/foo");
-    PATH_TEST_EQ(path("//net/foo/").lexically_normal().generic_path(), "//net/foo/.");
+    PATH_TEST_EQ(path("//net/foo/").lexically_normal().generic_path(), "//net/foo/" BOOST_FILESYSTEM_V3_TRAILING_DOT);
     PATH_TEST_EQ(path("//net/foo/..").lexically_normal().generic_path(), "//net/");
-    PATH_TEST_EQ(path("//net/foo/../").lexically_normal().generic_path(), "//net/.");
+    PATH_TEST_EQ(path("//net/foo/../").lexically_normal().generic_path(), "//net/" BOOST_FILESYSTEM_V3_TRAILING_DOT);
 
     PATH_TEST_EQ(path("/net/foo/bar").lexically_normal().generic_path(), "/net/foo/bar");
-    PATH_TEST_EQ(path("/net/foo/bar/").lexically_normal().generic_path(), "/net/foo/bar/.");
+    PATH_TEST_EQ(path("/net/foo/bar/").lexically_normal().generic_path(), "/net/foo/bar/" BOOST_FILESYSTEM_V3_TRAILING_DOT);
     PATH_TEST_EQ(path("/net/foo/..").lexically_normal().generic_path(), "/net");
-    PATH_TEST_EQ(path("/net/foo/../").lexically_normal().generic_path(), "/net/.");
+    PATH_TEST_EQ(path("/net/foo/../").lexically_normal().generic_path(), "/net/" BOOST_FILESYSTEM_V3_TRAILING_DOT);
 
     PATH_TEST_EQ(path("//net//foo//bar").lexically_normal().generic_path(), "//net/foo/bar");
-    PATH_TEST_EQ(path("//net//foo//bar//").lexically_normal().generic_path(), "//net/foo/bar/.");
+    PATH_TEST_EQ(path("//net//foo//bar//").lexically_normal().generic_path(), "//net/foo/bar/" BOOST_FILESYSTEM_V3_TRAILING_DOT);
     PATH_TEST_EQ(path("//net//foo//..").lexically_normal().generic_path(), "//net/");
-    PATH_TEST_EQ(path("//net//foo//..//").lexically_normal().generic_path(), "//net/.");
+    PATH_TEST_EQ(path("//net//foo//..//").lexically_normal().generic_path(), "//net/" BOOST_FILESYSTEM_V3_TRAILING_DOT);
 
     PATH_TEST_EQ(path("///net///foo///bar").lexically_normal().generic_path(), "/net/foo/bar");
-    PATH_TEST_EQ(path("///net///foo///bar///").lexically_normal().generic_path(), "/net/foo/bar/.");
+    PATH_TEST_EQ(path("///net///foo///bar///").lexically_normal().generic_path(), "/net/foo/bar/" BOOST_FILESYSTEM_V3_TRAILING_DOT);
     PATH_TEST_EQ(path("///net///foo///..").lexically_normal().generic_path(), "/net");
-    PATH_TEST_EQ(path("///net///foo///..///").lexically_normal().generic_path(), "/net/.");
+    PATH_TEST_EQ(path("///net///foo///..///").lexically_normal().generic_path(), "/net/" BOOST_FILESYSTEM_V3_TRAILING_DOT);
 
     if (platform == "Windows")
     {
@@ -2310,18 +2512,26 @@ void lexically_normal_tests()
         PATH_TEST_EQ(path("c:..").lexically_normal().generic_path(), "c:..");
         PATH_TEST_EQ(path("c:foo/..").lexically_normal().generic_path(), "c:");
 
-        PATH_TEST_EQ(path("c:foo/../").lexically_normal().generic_path(), "c:.");
+        PATH_TEST_EQ(path("c:foo/../").lexically_normal().generic_path(), "c:" BOOST_FILESYSTEM_V3_TRAILING_DOT);
 
         PATH_TEST_EQ(path("c:/foo/..").lexically_normal().generic_path(), "c:/");
-        PATH_TEST_EQ(path("c:/foo/../").lexically_normal().generic_path(), "c:/.");
+        PATH_TEST_EQ(path("c:/foo/../").lexically_normal().generic_path(), "c:/" BOOST_FILESYSTEM_V3_TRAILING_DOT);
         PATH_TEST_EQ(path("c:/..").lexically_normal().generic_path(), "c:/..");
+#if BOOST_FILESYSTEM_VERSION == 3
         PATH_TEST_EQ(path("c:/../").lexically_normal().generic_path(), "c:/../.");
+#else
+        PATH_TEST_EQ(path("c:/../").lexically_normal().generic_path(), "c:/..");
+#endif
         PATH_TEST_EQ(path("c:/../..").lexically_normal().generic_path(), "c:/../..");
+#if BOOST_FILESYSTEM_VERSION == 3
         PATH_TEST_EQ(path("c:/../../").lexically_normal().generic_path(), "c:/../../.");
+#else
+        PATH_TEST_EQ(path("c:/../../").lexically_normal().generic_path(), "c:/../..");
+#endif
         PATH_TEST_EQ(path("c:/../foo").lexically_normal().generic_path(), "c:/../foo");
-        PATH_TEST_EQ(path("c:/../foo/").lexically_normal().generic_path(), "c:/../foo/.");
+        PATH_TEST_EQ(path("c:/../foo/").lexically_normal().generic_path(), "c:/../foo/" BOOST_FILESYSTEM_V3_TRAILING_DOT);
         PATH_TEST_EQ(path("c:/../../foo").lexically_normal().generic_path(), "c:/../../foo");
-        PATH_TEST_EQ(path("c:/../../foo/").lexically_normal().generic_path(), "c:/../../foo/.");
+        PATH_TEST_EQ(path("c:/../../foo/").lexically_normal().generic_path(), "c:/../../foo/" BOOST_FILESYSTEM_V3_TRAILING_DOT);
         PATH_TEST_EQ(path("c:/..foo").lexically_normal().generic_path(), "c:/..foo");
     }
     else // POSIX
@@ -2330,15 +2540,19 @@ void lexically_normal_tests()
         PATH_TEST_EQ(path("c:foo/..").lexically_normal(), ".");
         PATH_TEST_EQ(path("c:foo/../").lexically_normal(), ".");
         PATH_TEST_EQ(path("c:/foo/..").lexically_normal(), "c:");
-        PATH_TEST_EQ(path("c:/foo/../").lexically_normal(), "c:/.");
+        PATH_TEST_EQ(path("c:/foo/../").lexically_normal(), "c:/" BOOST_FILESYSTEM_V3_TRAILING_DOT);
         PATH_TEST_EQ(path("c:/..").lexically_normal(), ".");
         PATH_TEST_EQ(path("c:/../").lexically_normal(), ".");
         PATH_TEST_EQ(path("c:/../..").lexically_normal(), "..");
+#if BOOST_FILESYSTEM_VERSION == 3
         PATH_TEST_EQ(path("c:/../../").lexically_normal(), "../.");
+#else
+        PATH_TEST_EQ(path("c:/../../").lexically_normal(), "..");
+#endif
         PATH_TEST_EQ(path("c:/../foo").lexically_normal(), "foo");
-        PATH_TEST_EQ(path("c:/../foo/").lexically_normal(), "foo/.");
+        PATH_TEST_EQ(path("c:/../foo/").lexically_normal(), "foo/" BOOST_FILESYSTEM_V3_TRAILING_DOT);
         PATH_TEST_EQ(path("c:/../../foo").lexically_normal(), "../foo");
-        PATH_TEST_EQ(path("c:/../../foo/").lexically_normal(), "../foo/.");
+        PATH_TEST_EQ(path("c:/../../foo/").lexically_normal(), "../foo/" BOOST_FILESYSTEM_V3_TRAILING_DOT);
         PATH_TEST_EQ(path("c:/..foo").lexically_normal(), "c:/..foo");
     }
 }
@@ -2380,7 +2594,8 @@ int cpp_main(int, char*[])
 
     construction_tests();
     append_tests();
-    self_assign_and_append_tests();
+    concat_tests();
+    self_assign_append_concat_tests();
     overload_tests();
     query_and_decomposition_tests();
     composition_tests();

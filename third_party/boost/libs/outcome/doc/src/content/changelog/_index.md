@@ -4,7 +4,70 @@ weight = 80
 +++
 
 ---
-## v2.2.1 ? (Boost 1.77) [[release]](https://github.com/ned14/outcome/releases/tag/v2.2.1)
+## v2.2.4 ? 2022 (Boost 1.80) [[release]](https://github.com/ned14/outcome/releases/tag/v2.2.4)
+
+### Enhancements:
+
+- Update to latest `status-code` in Experimental.Outcome, which has some breaking changes and important
+bug fixes.
+
+- Add {{<api "generator<T, Executor = void>" >}} to coroutine awaitables.
+
+- Add optional `Executor` template parameter to all Outcome awaitable types for improved compatibility
+with third party software such as [ASIO](https://think-async.com/Asio/).
+
+- To Experimental.Outcome add `clone()` for `basic_result` and `basic_outcome` types whose `EC` is
+a `status_code`. Erased status codes are move-only which makes the Result/Outcome type move-only, but
+they provide a cloning function, so this convenience function both clones the status code and propagates
+the spare storage so stack backtraces etc are also cloned.
+
+- Add type constraints to `success()` and `failure()` to disable them if they aren't available.
+
+- Work around a bug in GCC's C++ Coroutines implementation whereby one gets an ICE from `gimplify_expr`
+in any `BOOST_OUTCOME_CO_TRY` taking even a mildly complex expression, which obviously is a showstopper.
+The work around assigns the failure type to a stack temporary before `co_return`-ing that
+temporary. Thanks to RVO pre-17 and copy elision since, this should add no runtime overhead.
+
+### Bug fixes:
+
+[#261](https://github.com/ned14/outcome/issues/261)
+: Move assignable with move constructible not available did not work with `void`.
+
+---
+## v2.2.3 17th March 2022 (Boost 1.79) [[release]](https://github.com/ned14/outcome/releases/tag/v2.2.3)
+
+### Enhancements:
+
+Standalone Outcome permanently locks ABI to v2.2.3 release
+: From this release onwards, you are guaranteed that any code compiled with v2.2.3 Outcome
+or newer will link without issue with any code compiled with a different version of Outcome
+after v2.2.3. As a result, `BOOST_OUTCOME_UNSTABLE_VERSION` is no longer defined by default, and
+therefore `BOOST_OUTCOME_V2_NAMESPACE` is now hard coded to `outcome_v2` rather than a namespace
+which permutes per commit.
+
+### Bug fixes:
+
+[#255](https://github.com/ned14/outcome/issues/259)
+: Fix enabling of move assignable was not calculated correctly.
+
+---
+## v2.2.2 8th December 2021 (Boost 1.78) [[release]](https://github.com/ned14/outcome/releases/tag/v2.2.2)
+
+### Enhancements:
+
+[#255](https://github.com/ned14/outcome/issues/255)
+: Restore Experimental Outcome constexpr compatibility in C++ 20 which was an undocumented
+property of the Outcome v2.1 series, and which had been dropped in the v2.2 series.
+
+GCC Coroutines support
+: Coroutine support in GCCs after 10 is now correctly detected.
+
+### Bug fixes:
+
+- None.
+
+---
+## v2.2.1 13th August 2021 (Boost 1.77) [[release]](https://github.com/ned14/outcome/releases/tag/v2.2.1)
 
 ### Bug fixes:
 

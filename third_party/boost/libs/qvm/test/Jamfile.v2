@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2016 Emil Dotchevski and Reverge Studios, Inc.
+# Copyright 2008-2022 Emil Dotchevski and Reverge Studios, Inc.
 
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -38,8 +38,12 @@ headers-compile-test [ glob ../include/boost/qvm/*.hpp ]
 run math_test.cpp ;
 
 run mat_traits_array_test.cpp ;
+run mat_traits_std_array_test.cpp ;
 run vec_traits_array_test.cpp ;
+run vec_traits_gnuc_test.cpp ;
+run vec_traits_std_array_test.cpp ;
 run quat_traits_array_test.cpp ;
+run quat_traits_std_array_test.cpp ;
 
 run access_m_test.cpp ;
 compile-fail access_m_fail1.cpp ;
@@ -170,9 +174,9 @@ run swizzle4_test4.cpp ;
 run swizzle4_test.cpp ;
 
 compile deduce_scalar_test.cpp ;
-compile-fail deduce_scalar_fail1.cpp ;
-compile-fail deduce_scalar_fail2.cpp ;
-compile-fail deduce_scalar_fail3.cpp ;
+run deduce_scalar_mq_test.cpp ;
+run deduce_scalar_mv_test.cpp ;
+compile-fail deduce_scalar_fail.cpp ;
 
 compile deduce_mat_test.cpp ;
 compile deduce_quat_test.cpp ;

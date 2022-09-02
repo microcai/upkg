@@ -73,7 +73,11 @@ int main(int, char *[])
     // Other non-trivial constructors are allowed.
     test_struct_with_ctor_api< atomic_ref_wrapper >();
 
-#if !defined(BOOST_ATOMIC_DETAIL_NO_CXX17_DEDUCTION_GUIDES)
+#if !defined(BOOST_ATOMIC_NO_CLEAR_PADDING)
+    test_struct_with_padding_api< atomic_ref_wrapper >();
+#endif
+
+#if !defined(BOOST_NO_CXX17_DEDUCTION_GUIDES)
     if (boost::atomic_ref< int >::is_always_lock_free)
     {
         aligned_object< int, boost::atomic_ref< int >::required_alignment > object(0);

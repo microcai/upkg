@@ -18,7 +18,7 @@
     <h3 class="author"><span class="firstname">Niall</span> <span class="surname">Douglas</span></h3>
   </div>
 </div>
-<div><p class="copyright">Copyright &#169; 2014-2021 Niall Douglas <a href="./credits.html">and others</a></p></div>
+<div><p class="copyright">Copyright &#169; 2014-2022 Niall Douglas <a href="./credits.html">and others</a></p></div>
 <div><div class="legalnotice">
 <a name="outcome.legal"></a><p>
         Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -30,16 +30,25 @@
 <dl class="toc">
   <dt><span class="section"><a href="./requirements.html">Prerequisites</a></span></dt>
   <dt><span class="section"><a href="./build.html">Build and install</a></span></dt>
+  <dt><span class="section"><a href="./alternatives.html">Review of Error Handling Frameworks</a></span></dt>
+        <dd><dl>
+  <dt><span class="section"><a href="./alternatives/exceptions.html">std exception throws</a></span></dt>
+  <dt><span class="section"><a href="./alternatives/error_code.html">std error codes</a></span></dt>
+  <dt><span class="section"><a href="./alternatives/expected.html">std expected</a></span></dt>
+  <dt><span class="section"><a href="./alternatives/outcome.html">Outcome (proposed std result)</a></span></dt>
+  <dt><span class="section"><a href="./alternatives/leaf.html">LEAF</a></span></dt>
+        </dl></dd>
   <dt><span class="section"><a href="./motivation.html">Motivation</a></span></dt>
         <dd><dl>
   <dt><span class="section"><a href="./motivation/exceptions.html">Exceptions</a></span></dt>
   <dt><span class="section"><a href="./motivation/errno.html">errno</a></span></dt>
   <dt><span class="section"><a href="./motivation/error_codes.html">Error codes</a></span></dt>
   <dt><span class="section"><a href="./motivation/std_error_code.html">std::error_code</a></span></dt>
-  <dt><span class="section"><a href="./motivation/plug_error_code.html">Plugging a library into std::error_code`</a></span></dt>
-  <dt><span class="section"><a href="./motivation/plug_error_code2.html">Plugging a library into boost::system::error_code</a></span></dt>
+  <dt><span class="section"><a href="./motivation/plug_error_code.html">Plugging a library into <code>std::error_code</code></a></span></dt>
+  <dt><span class="section"><a href="./motivation/plug_error_code2.html">Plugging a library into <code>boost::system::error_code</code></a></span></dt>
   <dt><span class="section"><a href="./motivation/narrow_contract.html">Narrow contracts</a></span></dt>
         </dl></dd>
+  <dt><span class="section"><a href="./abi-stability.html">Future ABI stability guarantees</a></span></dt>
   <dt><span class="section"><a href="./tutorial.html">Tutorial</a></span></dt>
         <dd><dl>
   <dt><span class="section"><a href="./tutorial/essential.html">Essential</a></span></dt>
@@ -88,9 +97,9 @@
 
 <div class="notices note" style="background: url('images/note.png') top left no-repeat padding-box padding-box;">
 <div class="notices heading">note</div>
-<div class="notices message"><p>At the end of December 2020, Outcome v2.2 replaced v2.1 in develop branch. This is a breaking
-change and all Outcome v2.1 code will need to be upgraded using <a href="./changelog/upgrade_v21_v22.html">the v2.1 =&gt; v2.2 upgrade guide</a>. See also
-<a href="./changelog/v22.html">the list of v2.2 major changes</a>.</p>
+<div class="notices message"><p>At the end of December 2021, Standalone Outcome
+<a href="./abi-stability.html">went guaranteed future ABI stable</a>.
+From v2.2.3 onwards, you get ABI compatibilty guarantees across Outcome releases.</p>
 </div>
 </div>
 
@@ -126,10 +135,11 @@ thus making it suitable for use in the global headers of really large codebases.
 guaranteed and is C-compatible for <code>result&lt;T, E&gt;</code><sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup>, thus making Outcome based code long term ABI-stable.</p>
 
 <p>Fully deterministic all-<code>noexcept</code> C++ Coroutine support in Outcome is particularly strong, and we
-supply Outcome-optimising <a href="./reference/types/awaitables/eager.html" class="api-reference"><code>eager&lt;T&gt;/atomic_eager&lt;T&gt;</code></a>
- and <a href="./reference/types/awaitables/lazy.html" class="api-reference"><code>lazy&lt;T&gt;/atomic_lazy&lt;T&gt;</code></a>
+supply Outcome-optimising <a href="./reference/types/awaitables/eager.html" class="api-reference"><code>eager&lt;T, Executor = void&gt;/atomic_eager&lt;T, Executor = void&gt;</code></a>
+, <a href="./reference/types/awaitables/lazy.html" class="api-reference"><code>lazy&lt;T, Executor = void&gt;/atomic_lazy&lt;T, Executor = void&gt;</code></a>
 
-awaitables which work for any user type.</p>
+and <a href="./reference/types/awaitables/generator.html" class="api-reference"><code>generator&lt;T, Executor = void&gt;</code></a>
+ awaitables which work for any user type.</p>
 
 <h2 id="sample-usage">Sample usage</h2>
 
@@ -183,7 +193,7 @@ is available in scope.</p>
 </div>
 
 
-        </div><p><small>Last revised: February 12, 2021 at 20:25:43 UTC</small></p>
+        </div><p><small>Last revised: March 18, 2022 at 14:45:32 UTC</small></p>
 <hr>
 <div class="spirit-nav">
 <a accesskey="p" href="./history.html"><img src="./images/prev.png" alt="Prev"></a>

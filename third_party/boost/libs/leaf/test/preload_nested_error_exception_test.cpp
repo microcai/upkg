@@ -1,9 +1,10 @@
-// Copyright (c) 2018-2021 Emil Dotchevski and Reverge Studios, Inc.
+// Copyright 2018-2022 Emil Dotchevski and Reverge Studios, Inc.
 
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include <boost/leaf/detail/config.hpp>
+#include <boost/leaf/config.hpp>
+
 #ifdef BOOST_LEAF_NO_EXCEPTIONS
 
 #include <iostream>
@@ -37,7 +38,7 @@ struct info
 void f0()
 {
     auto load = leaf::on_error( info<0>{0} );
-    throw leaf::exception(info<2>{2});
+    leaf::throw_exception(info<2>{2});
 }
 
 void f1()

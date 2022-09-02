@@ -5,19 +5,18 @@ include(CMakeDetermineASMCompiler)
 include(CheckFunctionExists)
 
 if(WIN32)
-ENABLE_LANGUAGE(ASM_MASM)
+	ENABLE_LANGUAGE(ASM_MASM)
 else()
-ENABLE_LANGUAGE(ASM)
+	ENABLE_LANGUAGE(ASM)
 endif()
 
 find_package(Threads)
 
 check_function_exists(swapcontext HAVE_UCONTEXT)
 
-
 SET(BOOST_ATOMIC_SRC libs/atomic/src/lock_pool.cpp)
 if(WIN32)
-	set(BOOST_ATOMIC_SRC ${BOOST_ATOMIC_SRC} libs/atomic/src/wait_ops_windows.cpp)
+	set(BOOST_ATOMIC_SRC ${BOOST_ATOMIC_SRC} libs/atomic/src/wait_on_address.cpp)
 endif()
 
 set(BOOST_SERIALIZATION_SRC
@@ -173,6 +172,7 @@ set(BOOST_DATE_TIME_SRC
 
 set(BOOST_EXCEPTION_SRC libs/exception/src/clone_current_exception_non_intrusive.cpp)
 
+if(USE_BOOST_FILESYSTEM)
 set(BOOST_FILESYSTEM_SRC
 	libs/filesystem/src/atomic_ref.hpp
 	libs/filesystem/src/atomic_tools.hpp
@@ -193,6 +193,7 @@ set(BOOST_FILESYSTEM_SRC
 	libs/filesystem/src/windows_file_codecvt.hpp
 	libs/filesystem/src/windows_tools.hpp
 )
+endif()
 
 set(BOOST_LOCALE_SRC
 	libs/locale/src/encoding/codepage.cpp
@@ -314,6 +315,32 @@ list(APPEND BOOST_FIBER_SRC
 )
 endif()
 
+if (USE_BOOST_TEST)
+set(BOOST_TEST_SRC
+	libs/test/src/compiler_log_formatter.cpp
+	libs/test/src/cpp_main.cpp
+	libs/test/src/debug.cpp
+	libs/test/src/decorator.cpp
+	libs/test/src/execution_monitor.cpp
+	libs/test/src/framework.cpp
+	libs/test/src/junit_log_formatter.cpp
+	libs/test/src/plain_report_formatter.cpp
+	libs/test/src/progress_monitor.cpp
+	libs/test/src/results_collector.cpp
+	libs/test/src/results_reporter.cpp
+	libs/test/src/test_framework_init_observer.cpp
+	libs/test/src/test_main.cpp
+	libs/test/src/test_tools.cpp
+	libs/test/src/test_tree.cpp
+	libs/test/src/unit_test_log.cpp
+	libs/test/src/unit_test_main.cpp
+	libs/test/src/unit_test_monitor.cpp
+	libs/test/src/unit_test_parameters.cpp
+	libs/test/src/xml_log_formatter.cpp
+	libs/test/src/xml_report_formatter.cpp
+)
+endif()
+
 set(BOOST_SRCS ${BOOST_ATOMIC_SRC})
 
 add_library(boost_header INTERFACE)
@@ -373,12 +400,14 @@ add_library(boost_chrono_dll SHARED ${BOOST_CHRONO_SRC})
 add_library(Boost::chrono ALIAS boost_chrono_dll)
 endif()
 
+if(USE_BOOST_FILESYSTEM)
 if(Boost_USE_STATIC_LIBS)
 add_library(boost_filesystem_static STATIC ${BOOST_FILESYSTEM_SRC})
 add_library(Boost::filesystem ALIAS boost_filesystem_static)
 else()
 add_library(boost_filesystem_dll SHARED ${BOOST_FILESYSTEM_SRC})
 add_library(Boost::filesystem ALIAS boost_filesystem_dll)
+endif()
 endif()
 
 if(USE_BOOST_LOCALE)
@@ -468,6 +497,44 @@ if (USE_BOOST_FIBER)
 	endif()
 endif()
 
+if (USE_BOOST_TEST)
+	if(Boost_USE_STATIC_LIBS)
+		add_library(boost_test_static STATIC ${BOOST_TEST_SRC})
+		add_library(Boost::test ALIAS boost_test_static)
+	else()
+		add_library(boost_test_dll SHARED ${BOOST_TEST_SRC})
+		add_library(Boost::test ALIAS boost_test_dll)
+	endif()
+endif()
+
+if (Boost_USE_STATIC_LIBS)
+	add_library(boost_asio_static STATIC asio.cpp)
+	add_library(Boost::asio ALIAS boost_asio_static)
+	if (OpenSSL_FOUND)
+		message(STATUS "**************************** OPENSSL FOUND = ${OpenSSL_FOUND} ****************************")
+		target_compile_definitions(boost_asio_static PRIVATE -DHAVE_OPENSSL)
+		target_include_directories(boost_asio_static PUBLIC ${OPENSSL_INCLUDE_DIR})
+		target_link_libraries(boost_asio_static ${OPENSSL_LIBRARIES})
+	endif()
+else()
+	add_library(boost_asio_dll SHARED asio.cpp)
+	add_library(Boost::asio ALIAS boost_asio_dll)
+	if (OpenSSL_FOUND)
+		message(STATUS "**************************** OPENSSL FOUND = ${OpenSSL_FOUND} ****************************")
+		target_compile_definitions(boost_asio_dll PRIVATE -DHAVE_OPENSSL)
+		target_include_directories(boost_asio_dll PUBLIC ${OPENSSL_INCLUDE_DIR})
+		target_link_libraries(boost_asio_dll ${OPENSSL_LIBRARIES})
+	endif()
+endif()
+
+if (Boost_USE_STATIC_LIBS)
+	add_library(boost_beast_static STATIC beast.cpp)
+	add_library(Boost::beast ALIAS boost_beast_static)
+else()
+	add_library(boost_beast_dll SHARED beast.cpp)
+	add_library(Boost::beast ALIAS boost_beast_dll)
+endif()
+
 target_include_directories(boost_header INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_compile_definitions(boost_header INTERFACE -DBOOST_ALL_NO_LIB -DBOOST_ALL_STATIC_LINK -DBOOST_THREAD_USE_LIB)
@@ -475,17 +542,36 @@ target_compile_definitions(boost_thread_static PRIVATE -DBOOST_THREAD_BUILD_LIB)
 target_compile_definitions(boost_context_static PUBLIC -DBOOST_ALL_NO_LIB -DBOOST_ALL_STATIC_LINK)
 target_compile_definitions(boost_context_static PRIVATE -DBOOST_CONTEXT_EXPORT)
 
-target_compile_definitions(boost_filesystem_static PUBLIC -DBOOST_FILESYSTEM_STATIC_LINK -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF)
+if(USE_BOOST_FILESYSTEM)
+	if(APPLE)
+		target_compile_definitions(boost_filesystem_static PUBLIC -DBOOST_FILESYSTEM_STATIC_LINK -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF)
+	else()
+		target_compile_definitions(boost_filesystem_static PUBLIC -DBOOST_FILESYSTEM_STATIC_LINK -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_FILESYSTEM_HAS_POSIX_AT_APIS)
+	endif()
+endif()
 
 target_compile_definitions(boost_json_static PUBLIC -DBOOST_JSON_SOURCE -DBOOST_JSON_STATIC_LINK)
 target_compile_definitions(boost_json_static PRIVATE -DBOOST_JSON_SOURCE -DBOOST_JSON_STATIC_LINK)
 
+if (USE_BOOST_TEST)
+	if(Boost_USE_STATIC_LIBS)
+		target_compile_definitions(boost_test_static PUBLIC -DBOOST_TEST_STATIC_LINK)
+	else()
+		target_compile_definitions(boost_test_static PUBLIC -DBOOST_TEST_DYN_LINK)
+	endif()
+endif()
+
 if(Boost_USE_STATIC_LIBS)
+	if (USE_BOOST_TEST)
+		target_link_libraries(boost_test_static boost_header)
+	endif()
 	target_link_libraries(boost_atomic_static boost_header)
 	if(USE_BOOST_SERIALIZATION)
 		target_link_libraries(boost_serialization_static boost_header)
 	endif()
-	target_link_libraries(boost_filesystem_static boost_header)
+	if(USE_BOOST_FILESYSTEM)
+		target_link_libraries(boost_filesystem_static boost_header)
+	endif()
 	target_link_libraries(boost_thread_static boost_header Threads::Threads)
 	target_link_libraries(boost_context_static boost_header)
 if (USE_BOOST_FIBER)
@@ -502,13 +588,20 @@ endif()
 	target_link_libraries(boost_timer_static boost_chrono_static boost_header)
 	target_link_libraries(boost_exception_static boost_header)
 	target_link_libraries(boost_random_static boost_header)
-	target_link_libraries(boost_program_options_static boost_filesystem_static boost_header)
+	target_link_libraries(boost_program_options_static boost_header)
+	target_link_libraries(boost_asio_static boost_thread_static)
+	target_link_libraries(boost_beast_static boost_asio_static)
 else()
+	if (USE_BOOST_TEST)
+		target_link_libraries(boost_test_dll boost_header)
+	endif()
 	target_link_libraries(boost_atomic_dll boost_header)
 	if(USE_BOOST_SERIALIZATION)
 		target_link_libraries(boost_serialization_dll boost_header)
 	endif()
-	target_link_libraries(boost_filesystem_dll boost_header)
+	if(USE_BOOST_FILESYSTEM)
+		target_link_libraries(boost_filesystem_dll boost_header)
+	endif()
 	target_link_libraries(boost_thread_dll boost_header Threads::Threads)
 	target_link_libraries(boost_context_dll boost_header)
 	target_link_libraries(boost_coroutine_dll boost_context_static boost_header)
@@ -525,7 +618,9 @@ endif()
 	target_link_libraries(boost_timer_dll boost_chrono_static boost_header)
 	target_link_libraries(boost_exception_dll boost_header)
 	target_link_libraries(boost_random_dll boost_header)
-	target_link_libraries(boost_program_options_dll boost_filesystem_static boost_header)
+	target_link_libraries(boost_program_options_dll boost_header)
+	target_link_libraries(boost_asio_dll boost_thread_dll)
+	target_link_libraries(boost_beast_dll boost_asio_dll)
 endif()
 
 if(WIN32)
@@ -559,14 +654,22 @@ set(BOOST_LIBRARIES
 	Boost::random
 	Boost::program_options
 	Boost::locale
+	Boost::test
 PARENT_SCOPE)
 
 if(Boost_USE_STATIC_LIBS)
+	set_target_properties(boost_asio_static PROPERTIES FOLDER "third_party/boost")
+	set_target_properties(boost_beast_static PROPERTIES FOLDER "third_party/boost")
+	if (USE_BOOST_TEST)
+		set_target_properties(boost_test_static PROPERTIES FOLDER "third_party/boost")
+	endif()
 	set_target_properties(boost_atomic_static PROPERTIES FOLDER "third_party/boost")
 	if(USE_BOOST_SERIALIZATION)
 		set_target_properties(boost_serialization_static PROPERTIES FOLDER "third_party/boost")
 	endif()
-	set_target_properties(boost_filesystem_static PROPERTIES FOLDER "third_party/boost")
+	if(USE_BOOST_FILESYSTEM)
+		set_target_properties(boost_filesystem_static PROPERTIES FOLDER "third_party/boost")
+	endif()
 	set_target_properties(boost_thread_static PROPERTIES FOLDER "third_party/boost")
 	set_target_properties(boost_context_static PROPERTIES FOLDER "third_party/boost")
 if (USE_BOOST_FIBER)
@@ -585,11 +688,18 @@ endif()
 	set_target_properties(boost_random_static PROPERTIES FOLDER "third_party/boost")
 	set_target_properties(boost_program_options_static PROPERTIES FOLDER "third_party/boost")
 else()
+	set_target_properties(boost_asio_dll PROPERTIES FOLDER "third_party/boost")
+	set_target_properties(boost_beast_dll PROPERTIES FOLDER "third_party/boost")
+	if (USE_BOOST_TEST)
+		set_target_properties(boost_test_dll PROPERTIES FOLDER "third_party/boost")
+	endif()
 	set_target_properties(boost_atomic_dll PROPERTIES FOLDER "third_party/boost")
 	if(USE_BOOST_SERIALIZATION)
 		set_target_properties(boost_serialization_dll PROPERTIES FOLDER "third_party/boost")
 	endif()
-	set_target_properties(boost_filesystem_dll PROPERTIES FOLDER "third_party/boost")
+	if(USE_BOOST_FILESYSTEM)
+		set_target_properties(boost_filesystem_dll PROPERTIES FOLDER "third_party/boost")
+	endif()
 	set_target_properties(boost_thread_dll PROPERTIES FOLDER "third_party/boost")
 	set_target_properties(boost_context_dll PROPERTIES FOLDER "third_party/boost")
 	set_target_properties(boost_fiber_dll PROPERTIES FOLDER "third_party/boost")

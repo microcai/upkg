@@ -3,8 +3,8 @@
 
 // Copyright (c) 2012-2019 Barend Gehrels, Amsterdam, the Netherlands.
 
-// This file was modified by Oracle on 2016.
-// Modifications copyright (c) 2016, Oracle and/or its affiliates.
+// This file was modified by Oracle on 2016-2021.
+// Modifications copyright (c) 2016-2021, Oracle and/or its affiliates.
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Use, modification and distribution is subject to the Boost Software License,
@@ -108,6 +108,7 @@ static std::string const mysql_25662426a = "LINESTRING(170 4756, 168 4756, 168 4
 
 static std::string const issue_596 = "LINESTRING(292979.660 6688731.370, 292979.600 6688733.420, 292979.540 6688735.440, 292979.540 6688735.500)";
 static std::string const issue_803 = "LINESTRING(2773.6899360413681 -17.493356405074767,2767.9084041267429 -9.0288291122330797,2765.7403296587586 -1.6929054585683376,2765.3273630934282 6.6613381477509392e-16,2762.8495637014462 10.157432751410026,2759.9587977441333 24.829280059133669,2756.3453402974928 38.372523727680374,2752.0091913615238 45.708447381345117)";
+static std::string const issue_988 = "LINESTRING(0.10144 0.034912,0.106079 0.035156,0.109375 0.034302,0.114502 0.035889,0.116333 0.036743,0.117065 0.036499,0.121582 0.035156,0.12439 0.029175,0.123779 0.026978,0.12146 0.025513,0.119507 0.025513,0.118164 0.025513,0.114624 0.025757,0.111694 0.026001,0.108887 0.02832,0.105957 0.028442,0.099854 0.027344,0.095581 0.029419,0.093506 0.031128,0.090576 0.032593,0.085571 0.032959,0.082153 0.035522,0.081421 0.039307,0.082275 0.044067,0.083862 0.047485,0.08606 0.049805,0.087891 0.051025,0.090942 0.05188,0.094727 0.051392,0.100098 0.050049,0.10144 0.05249,0.100952 0.054932,0.098633 0.05835,0.098267 0.062134,0.098755 0.064697,0.098511 0.067383,0.113892 0.068848,0.110718 0.065552,0.109619 0.064331,0.111084 0.063965,0.118042 0.0625,0.115234 0.049805,0.117676 0.049194,0.118774 0.046997,0.119385 0.04541,0.119507 0.043945,0.116089 0.041138,0.116089 0.041016,0.11438 0.040894,0.11145 0.041016,0.109009 0.042114,0.106079 0.04248,0.102417 0.041138,0.102051 0.040039)";
 
 template <bool Clockwise, typename P>
 void test_all()
@@ -128,7 +129,7 @@ void test_all()
 
     ut_settings const settings;
     ut_settings const specific_settings
-            = BOOST_GEOMETRY_CONDITION((boost::is_same<coor_type, long double>::value))
+            = BOOST_GEOMETRY_CONDITION((std::is_same<coor_type, long double>::value))
               ? ut_settings(0.02) : settings;
 
     // Simplex (join-type is not relevant)
@@ -258,7 +259,7 @@ void test_all()
         test_one<linestring, polygon>("mysql_report_2015_04_01", mysql_report_2015_04_01, join_round(32), end_round(32), 632.234, d100);
     }
 
-    if (! BOOST_GEOMETRY_CONDITION((boost::is_same<coor_type, float>::value)))
+    if (! BOOST_GEOMETRY_CONDITION((std::is_same<coor_type, float>::value)))
     {
         ut_settings settings;
         settings.tolerance = 0.1;
@@ -308,12 +309,22 @@ void test_all()
         test_one<linestring, polygon>("issue_803", issue_803, join_round(36), end_round(36), 1664.0528, 10.0);
     }
 
+#if ! defined(BOOST_GEOMETRY_USE_RESCALING)
+    {
+        using bg::strategy::buffer::join_round;
+        using bg::strategy::buffer::end_round;
+        test_one<linestring, polygon>("issue_988_a", issue_988, join_round(8), end_round(8), 0.0029235, 0.010068);
+        test_one<linestring, polygon>("issue_988_b", issue_988, join_round(32), end_round(32), 0.0029614, 0.0101);
+        test_one<linestring, polygon>("issue_988_c", issue_988, join_round(32), end_round(32), 0.0031514, 0.011);
+    }
+#endif
+
     test_one<linestring, polygon>("mysql_report_2015_06_11",
             mysql_report_2015_06_11, join_round32, end_round32,
             27862.733459829971,
             5.9518403867035365);
 
-    if (BOOST_GEOMETRY_CONDITION((boost::is_same<coor_type, double>::value)))
+    if (BOOST_GEOMETRY_CONDITION((std::is_same<coor_type, double>::value)))
     {
         test_one<linestring, polygon>("mysql_report_2015_09_08a", mysql_report_2015_09_08a, join_round32, end_round32, 0.0, 1.0);
         test_one<linestring, polygon>("mysql_report_2015_09_08b", mysql_report_2015_09_08b, join_round32, end_round32, 0.0, 1099511627778.0);
@@ -323,16 +334,22 @@ void test_all()
     test_one<linestring, polygon>("mysql_23023665_1", mysql_23023665, join_round32, end_flat, 459.1051, 10);
     test_one<linestring, polygon>("mysql_23023665_2", mysql_23023665, join_round32, end_flat, 6877.7097, 50);
 
+#if ! defined(BOOST_GEOMETRY_USE_RESCALING) || defined(BOOST_GEOMETRY_TEST_FAILURES)
     test_one<linestring, polygon>("mysql_25662426", mysql_25662426, join_round32, end_round32, 1, 0, 1660.6673, 10);
+#endif
 
     // Test behaviour with different buffer sizes, generating internally turns on different locations
     test_one<linestring, polygon>("mysql_25662426a_05", mysql_25662426a, join_round32, end_round32, 27.6156, 0.5);
     test_one<linestring, polygon>("mysql_25662426a_1", mysql_25662426a, join_round32, end_round32, 54.9018, 1.0);
     test_one<linestring, polygon>("mysql_25662426a_2", mysql_25662426a, join_round32, end_round32, 103.6072, 2.0);
+#if ! defined(BOOST_GEOMETRY_USE_RESCALING) || defined(BOOST_GEOMETRY_TEST_FAILURES)
     test_one<linestring, polygon>("mysql_25662426a_3", mysql_25662426a, join_round32, end_round32, 152.1163, 3.0);
+#endif
     test_one<linestring, polygon>("mysql_25662426a_4", mysql_25662426a, join_round32, end_round32, 206.4831, 4.0);
     test_one<linestring, polygon>("mysql_25662426a_5", mysql_25662426a, join_round32, end_round32, 266.8505, 5.0);
+#if ! defined(BOOST_GEOMETRY_USE_RESCALING) || defined(BOOST_GEOMETRY_TEST_FAILURES)
     test_one<linestring, polygon>("mysql_25662426a_10", mysql_25662426a, join_round32, end_round32, 660.7355, 10.0);
+#endif
 
     test_one<linestring, polygon>("mysql_25662426a_05", mysql_25662426a, join_round32, end_flat, 26.8352, 0.5);
     test_one<linestring, polygon>("mysql_25662426a_1", mysql_25662426a, join_round32, end_flat, 53.3411, 1.0);
@@ -366,7 +383,9 @@ void test_all()
     test_one<linestring, polygon>("mysql_25662426a_left_1", mysql_25662426a, join_round32, end_round32, 30.1214, 1.0, settings, 0.0);
     test_one<linestring, polygon>("mysql_25662426a_left_2", mysql_25662426a, join_round32, end_round32, 66.4858, 2.0, ut_settings(0.01, false), 0.0); // It has a self touching point
     test_one<linestring, polygon>("mysql_25662426a_left_3", mysql_25662426a, join_round32, end_round32, 108.3305, 3.0, settings, 0.0);
+//#if ! defined(BOOST_GEOMETRY_USE_RESCALING) || defined(BOOST_GEOMETRY_TEST_FAILURES)
     test_one<linestring, polygon>("mysql_25662426a_left_4", mysql_25662426a, join_round32, end_round32, 155.5128, 4.0, specific_settings, 0.0);
+//#endif
     test_one<linestring, polygon>("mysql_25662426a_left_5", mysql_25662426a, join_round32, end_round32, 208.1289, 5.0, specific_settings, 0.0);
     test_one<linestring, polygon>("mysql_25662426a_left_10", mysql_25662426a, join_round32, end_round32, 554.8818, 10.0, specific_settings, 0.0);
 
@@ -390,7 +409,7 @@ template <bool Clockwise, typename P>
 void test_invalid()
 {
     typedef typename bg::coordinate_type<P>::type coor_type;
-    if (! BOOST_GEOMETRY_CONDITION((boost::is_same<coor_type, double>::value)))
+    if (! BOOST_GEOMETRY_CONDITION((std::is_same<coor_type, double>::value)))
     {
         return;
     }
@@ -430,7 +449,7 @@ int test_main(int, char* [])
 #endif
 
 #if defined(BOOST_GEOMETRY_TEST_FAILURES)
-    BoostGeometryWriteExpectedFailures(2, 4, 9, 4);
+    BoostGeometryWriteExpectedFailures(2, 4, 11, 3);
 #endif
 
     return 0;

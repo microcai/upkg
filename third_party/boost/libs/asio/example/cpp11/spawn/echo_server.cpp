@@ -2,12 +2,13 @@
 // echo_server.cpp
 // ~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2021 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2022 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#include <boost/asio/detached.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/spawn.hpp>
@@ -49,7 +50,7 @@ public:
             socket_.close();
             timer_.cancel();
           }
-        });
+        }, boost::asio::detached);
 
     boost::asio::spawn(strand_,
         [this, self](boost::asio::yield_context yield)
@@ -61,7 +62,7 @@ public:
             if (timer_.expires_from_now() <= std::chrono::seconds(0))
               socket_.close();
           }
-        });
+        }, boost::asio::detached);
   }
 
 private:
@@ -98,7 +99,7 @@ int main(int argc, char* argv[])
               std::make_shared<session>(io_context, std::move(socket))->go();
             }
           }
-        });
+        }, boost::asio::detached);
 
     io_context.run();
   }

@@ -1,3 +1,89 @@
+Version 330:
+
+* Update release notes for Boost 1.79.
+
+--------------------------------------------------------------------------------
+
+Version 329:
+
+* Add missing include in `file_body` test.
+
+--------------------------------------------------------------------------------
+
+Version 328:
+
+* Add ARM64 builds to Drone CI.
+
+--------------------------------------------------------------------------------
+
+Version 327:
+
+* Fix async_base documentation link.
+
+--------------------------------------------------------------------------------
+
+Version 326:
+
+* Remove GitHub stalebot.
+
+--------------------------------------------------------------------------------
+
+Version 325:
+
+* WebSocket handshake response is deterministic on failure.
+
+--------------------------------------------------------------------------------
+
+Version 324:
+
+* Fix open append mode for file_posix.
+* Fix open append mode for file_win32.
+* Add tests for file open in append mode.
+* Fix file open with append/append_existing flag on Windows.
+
+--------------------------------------------------------------------------------
+
+Version 323:
+
+* Fix clang-cl UTF8 path handling for `file_win32`.
+* Fix clang-cl UTF8 path handling for `file_stdio`. 
+* Add individual tests to CMake workflow.
+* Update CI to include gcc 11, clang 12, msvc 14.3. 
+* Update code coverage settings.
+
+--------------------------------------------------------------------------------
+
+Version 322:
+
+* Fix typo in `_experimental::test::basic_stream` documentation.
+
+--------------------------------------------------------------------------------
+
+Version 321:
+
+* Remove test framework's dependency on RTTI.
+* Fix CVE-2016-9840 in zlib implementation.
+* Fix TLS SNI handling in websocket_client_async_ssl example.
+* Fix reuse of sliding window in WebSocket permessage_deflate.
+* Fix accept error handling in http_server_async example.
+* Move library-specific docca configuration to Beast.
+* Remove dependency on RTTI in `test::stream`.
+
+--------------------------------------------------------------------------------
+
+Version 320:
+
+* Fix missing includes in `stream_state`.
+* Update GitHub Actions CI.
+
+--------------------------------------------------------------------------------
+
+Version 319:
+
+* Update release notes for Boost 1.77.
+
+--------------------------------------------------------------------------------
+
 Version 318:
 
 * Add a Boost-friendly subproject case to CMakeLists.

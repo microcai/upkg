@@ -38,6 +38,16 @@
   </url>
   
   <url>
+    <loc>/alternatives.html</loc>
+    <lastmod>2022-01-10T14:29:13+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/abi-stability.html</loc>
+    <lastmod>2021-12-15T11:47:12+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/tutorial/essential/no-value/custom.html</loc>
     <lastmod>2019-02-08T22:18:08+00:00</lastmod>
   </url>
@@ -108,6 +118,11 @@
   </url>
   
   <url>
+    <loc>/alternatives/exceptions.html</loc>
+    <lastmod>2022-01-10T14:29:13+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/recipes.html</loc>
     <lastmod>2019-02-08T22:18:08+00:00</lastmod>
   </url>
@@ -154,7 +169,7 @@
   
   <url>
     <loc>/tutorial/essential/coroutines/awaitables.html</loc>
-    <lastmod>2020-04-07T10:22:38+01:00</lastmod>
+    <lastmod>2022-03-18T14:45:32+00:00</lastmod>
   </url>
   
   <url>
@@ -203,6 +218,11 @@
   </url>
   
   <url>
+    <loc>/alternatives/error_code.html</loc>
+    <lastmod>2022-01-10T14:29:13+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/reference/converters.html</loc>
     <lastmod>2018-12-15T17:49:37+00:00</lastmod>
   </url>
@@ -229,7 +249,7 @@
   
   <url>
     <loc>/tutorial/essential/coroutines.html</loc>
-    <lastmod>2020-04-07T10:22:38+01:00</lastmod>
+    <lastmod>2022-03-18T14:45:32+00:00</lastmod>
   </url>
   
   <url>
@@ -274,7 +294,7 @@
   
   <url>
     <loc>/tutorial/essential/coroutines/returning.html</loc>
-    <lastmod>2020-04-07T10:22:38+01:00</lastmod>
+    <lastmod>2022-03-18T14:45:32+00:00</lastmod>
   </url>
   
   <url>
@@ -290,6 +310,11 @@
   <url>
     <loc>/reference/traits.html</loc>
     <lastmod>2018-12-13T17:36:11+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/alternatives/expected.html</loc>
+    <lastmod>2022-01-10T14:29:13+00:00</lastmod>
   </url>
   
   <url>
@@ -315,6 +340,11 @@
   <url>
     <loc>/tutorial/advanced/interop/app-map-filelib.html</loc>
     <lastmod>2019-02-11T13:38:04+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/alternatives/outcome.html</loc>
+    <lastmod>2022-01-10T14:29:13+00:00</lastmod>
   </url>
   
   <url>
@@ -393,8 +423,13 @@
   </url>
   
   <url>
+    <loc>/alternatives/leaf.html</loc>
+    <lastmod>2022-01-10T14:29:13+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/motivation/plug_error_code.html</loc>
-    <lastmod>2019-06-21T22:46:55+01:00</lastmod>
+    <lastmod>2021-09-10T11:56:40+01:00</lastmod>
   </url>
   
   <url>
@@ -424,7 +459,7 @@
   
   <url>
     <loc>/motivation/plug_error_code2.html</loc>
-    <lastmod>2019-06-21T22:46:55+01:00</lastmod>
+    <lastmod>2021-09-10T11:56:40+01:00</lastmod>
   </url>
   
   <url>
@@ -459,7 +494,7 @@
   
   <url>
     <loc>/changelog.html</loc>
-    <lastmod>2021-07-16T20:55:10+01:00</lastmod>
+    <lastmod>2022-05-02T17:59:08+01:00</lastmod>
   </url>
   
   <url>
@@ -484,7 +519,7 @@
   
   <url>
     <loc>/history.html</loc>
-    <lastmod>2020-09-16T11:58:04+01:00</lastmod>
+    <lastmod>2021-12-16T11:42:04+00:00</lastmod>
   </url>
   
   <url>
@@ -1365,7 +1400,7 @@
   
   <url>
     <loc>/tags/awaitables.html</loc>
-    <lastmod>2020-04-07T10:22:38+01:00</lastmod>
+    <lastmod>2022-03-18T14:45:32+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -1442,7 +1477,7 @@
   
   <url>
     <loc>/tags/coroutines.html</loc>
-    <lastmod>2020-04-07T10:22:38+01:00</lastmod>
+    <lastmod>2022-03-18T14:45:32+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -1478,7 +1513,7 @@
   
   <url>
     <loc>/tags/eager.html</loc>
-    <lastmod>2020-04-07T10:22:38+01:00</lastmod>
+    <lastmod>2022-03-18T14:45:32+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -1513,7 +1548,7 @@
   
   <url>
     <loc>/</loc>
-    <lastmod>2021-02-12T20:25:43+00:00</lastmod>
+    <lastmod>2022-03-18T14:45:32+00:00</lastmod>
   </url>
   
   <url>
@@ -1542,7 +1577,7 @@
   
   <url>
     <loc>/tags/lazy.html</loc>
-    <lastmod>2020-04-07T10:22:38+01:00</lastmod>
+    <lastmod>2022-03-18T14:45:32+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -1919,7 +1954,7 @@
   
   <url>
     <loc>/reference/types/awaitables/eager.html</loc>
-    <lastmod>2020-04-07T10:22:38+01:00</lastmod>
+    <lastmod>2022-03-18T14:45:32+00:00</lastmod>
   </url>
   
   <url>
@@ -1950,6 +1985,11 @@
   <url>
     <loc>/reference/types/failure_type.html</loc>
     <lastmod>2021-02-23T17:37:27+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/reference/types/awaitables/generator.html</loc>
+    <lastmod>2022-03-18T14:45:32+00:00</lastmod>
   </url>
   
   <url>
@@ -2004,7 +2044,7 @@
   
   <url>
     <loc>/reference/types/awaitables/lazy.html</loc>
-    <lastmod>2020-04-07T10:22:38+01:00</lastmod>
+    <lastmod>2022-03-18T14:45:32+00:00</lastmod>
   </url>
   
   <url>

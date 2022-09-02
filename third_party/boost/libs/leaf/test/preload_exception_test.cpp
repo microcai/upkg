@@ -1,9 +1,10 @@
-// Copyright (c) 2018-2021 Emil Dotchevski and Reverge Studios, Inc.
+// Copyright 2018-2022 Emil Dotchevski and Reverge Studios, Inc.
 
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include <boost/leaf/detail/config.hpp>
+#include <boost/leaf/config.hpp>
+
 #if defined(BOOST_LEAF_NO_EXCEPTIONS) || defined(BOOST_LEAF_NO_THREADS)
 
 #include <iostream>
@@ -66,7 +67,7 @@ int main()
         leaf::try_catch(
             []
             {
-                f1( [] { throw leaf::exception(); } );
+                f1( [] { leaf::throw_exception(); } );
                 return 0;
             },
             []( leaf::error_info const & err, info<1> )
@@ -87,7 +88,7 @@ int main()
         leaf::try_catch(
             []
             {
-                f2( [] { throw leaf::exception(); } );
+                f2( [] { leaf::throw_exception(); } );
                 return 0;
             },
             []( info<1> )
