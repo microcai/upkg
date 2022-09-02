@@ -6,7 +6,7 @@
 #include <QDesktopServices>
 
 #include "upkg/qcommondelegate.hpp"
-#include "upkg/url_parser.hpp"
+#include "upkg/url_view.hpp"
 #include "upkg/misc.hpp"
 
 #ifdef WIN32
