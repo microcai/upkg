@@ -370,12 +370,16 @@ void Datamodel::sort(int column, Qt::SortOrder order /*= Qt::AscendingOrder*/)
 
 	std::sort(m_data.begin(), m_data.end(), [column, asc, columnMember, this](const auto& left, const auto& right)
 	{
-		if (column == 5 || column == 6)
+		if (column == 3 || column == 5 || column == 6)
 		{
 			int64_t i = 0;
 			int64_t j = 0;
 			switch (column)
 			{
+			case 3:
+				i = left.m_compress ? 1 : 0;
+				j = right.m_compress ? 1 : 0;
+				break;
 			case 5:
 				i = left.m_filesize;
 				j = right.m_filesize;
