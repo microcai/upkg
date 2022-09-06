@@ -5,6 +5,9 @@
 #include "upkg/misc.hpp"
 #include "upkg/upkg.hpp"
 
+#include <fstream>
+#include <boost/json/src.hpp>
+
 #include <QLocale>
 #include <QXmlStreamWriter>
 
@@ -55,6 +58,15 @@ int Datamodel::work(const QString& url,
 	QFile file(outputDir.absolutePath() + QStringLiteral("/") + xmlFileName + ext);
 	file.open(QFile::WriteOnly | QFile::Text | QFile::Truncate);
 
+	std::string json_filename = outputDir.absolutePath().toStdString()
+		+ "/" + xmlPath.baseName().toStdString() + ".json";
+
+	using boost::json::object;
+	using boost::json::value;
+	using boost::json::array;
+
+	object obj;
+
 	QXmlStreamWriter stream(&file);
 	stream.setAutoFormatting(true);
 	stream.writeStartDocument();
@@ -72,12 +84,15 @@ int Datamodel::work(const QString& url,
 
 	stream.writeStartElement("update_root");
 	stream.writeAttribute("count", QString::number(count));
+	obj["count"] = count;
 
-	auto time = QDateTime::currentDateTime();
-	stream.writeAttribute("createtime", time.toString("yyyy-MM-dd hh:mm:ss.zzz"));
+	auto time = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz");
+	stream.writeAttribute("createtime", time);
+	obj["createtime"] = time.toStdString();
 
 	Q_EMIT mainWindow->workProgress(0);
 
+	array ar;
 	for (size_t i = 0; i < m_data_count; i++)
 	{
 		if (abort)
@@ -118,24 +133,46 @@ int Datamodel::work(const QString& url,
 
 		updateData(data);
 
+		object item;
 		stream.writeStartElement("file");
 		stream.writeAttribute("name", relative);
+		item["name"] = relative.toStdString();
 		stream.writeAttribute("version", data.m_fileversion);
+		item["version"] = data.m_fileversion.toStdString();
 		stream.writeAttribute("size", QString::number(data.m_filesize));
+		item["size"] = data.m_filesize;
 		stream.writeAttribute("zipsize", QString::number(data.m_zipfilesize));
+		item["zipsize"] = data.m_zipfilesize;
 		stream.writeAttribute("md5", data.m_md5);
+		item["md5"] = data.m_md5.toStdString();
 		stream.writeAttribute("filehash", data.m_zipmd5);
+		item["filehash"] = data.m_zipmd5.toStdString();
 		if (data.m_compress)
+		{
 			stream.writeAttribute("compress", data.m_file_type);
+			item["compress"] = data.m_file_type.toStdString();
+		}
 		else
+		{
 			stream.writeAttribute("compress", "none");
+			item["compress"] = "none";
+		}
 		stream.writeAttribute("url", data.m_url);
+		item["url"] = data.m_url.toStdString();
 		stream.writeEndElement();
+
+		ar.push_back(item);
 
 		dataChanged(index(static_cast<int>(i), 0), index(static_cast<int>(i), 6));
 
 		Q_EMIT mainWindow->workProgress(static_cast<int>(i + 1));
 	}
+
+	obj["files"] = ar;
+
+	std::ofstream f(std::filesystem::path(json_filename), std::ios_base::trunc);
+	f << obj;
+	f.close();
 
 	stream.writeEndElement();
 	stream.writeEndDocument();
