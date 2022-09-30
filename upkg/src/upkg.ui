@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>upkgClass</class>
  <widget class="QMainWindow" name="upkgClass">
@@ -76,7 +76,7 @@
           <item>
            <widget class="QLabel" name="label_8">
             <property name="text">
-             <string>XML文件名：</string>
+             <string>更新列表文件名：</string>
             </property>
            </widget>
           </item>
