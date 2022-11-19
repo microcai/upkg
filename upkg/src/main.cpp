@@ -6,6 +6,9 @@
 #include <QtPlugin>
 Q_IMPORT_PLUGIN(QICOPlugin);
 
+// Q_IMPORT_PLUGIN(QDirectFbIntegrationPlugin);
+Q_IMPORT_PLUGIN(QLinuxFbIntegrationPlugin);
+
 #if defined(QT_QPA_PLATFORM_XCB)
 Q_IMPORT_PLUGIN(QXcbIntegrationPlugin);
 #elif defined(QT_QPA_PLATFORM_WINDOWS)
@@ -36,14 +39,14 @@ int main(int argc, char *argv[])
 
 	QApplication a(argc, argv);
 
-    QApplication::setWindowIcon(QIcon(":///upkg.ico"));
+	QApplication::setWindowIcon(QIcon(":///upkg.ico"));
 
 #if defined(WIN32)
  	std::unique_ptr<QFont> default_font_ptr(new QFont("Consolas", 12));
  	globalDefaultFont = default_font_ptr.get();
 	a.setFont(*default_font_ptr);
 #else
-	std::unique_ptr<QFont> default_font_ptr(new QFont());
+	std::unique_ptr<QFont> default_font_ptr(new QFont("wqy-microhei", 12));
 	default_font_ptr->setFamily(default_font_ptr->defaultFamily());
 	a.setFont(*default_font_ptr);
 	globalDefaultFont = default_font_ptr.get();

@@ -6,7 +6,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/upkg.rc.in
 		${CMAKE_CURRENT_SOURCE_DIR}/src/upkg.rc @ONLY NEWLINE_STYLE LF)
 
 set(CMAKE_AUTOMOC ON)
-set(QtComponent BundledPcre2 BundledLibpng BundledHarfbuzz BundledFreetype BundledLibjpeg CoreTools GuiTools WidgetsTools Core Gui Widgets Concurrent)
+set(QtComponent BundledHarfbuzz BundledFreetype CoreTools GuiTools WidgetsTools Core Gui Widgets Concurrent)
 
 if(WIN32)
 	if(MSVC AND ENABLE_QT_STATIC)
@@ -14,7 +14,7 @@ if(WIN32)
 	endif()
 endif()
 
-find_package(Qt6 6.3.0 COMPONENTS ${QtComponent} REQUIRED)
+find_package(Qt6 6.4.1 COMPONENTS ${QtComponent} REQUIRED)
 link_libraries(Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Concurrent)
 
 if(WIN32 AND MSVC AND ENABLE_QT_STATIC)
@@ -25,17 +25,26 @@ if(WIN32 AND MSVC AND ENABLE_QT_STATIC)
 
 	link_libraries(
 		${Qt6HB_LIBRARIES}
-
 		${Qt6PNG_LIBRARIES}
 		${Qt6QTPCRE_LIBRARIES}
 		${Qt6QTFREETYPE_LIBRARIES}
 		Qt6::QWindowsIntegrationPlugin
 		Qt6::QWindowsVistaStylePlugin
 		Qt6::QICOPlugin
+		Qt6::QDirectFbIntegrationPlugin
+		Qt6::QLinuxFbIntegrationPlugin
 	)
 
 	add_definitions(-DSTATIC_QT6)
 	add_definitions(-DQT_STATICPLUGIN)
+else()
+	link_libraries(
+		udev
+		input
+		xkbcommon
+		Qt6::QICOPlugin
+		Qt6::QLinuxFbIntegrationPlugin
+	)
 endif()
 
 qt6_wrap_ui(UI_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/upkg.ui)
