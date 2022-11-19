@@ -102,11 +102,15 @@ if (WIN32)
 	add_subdirectory(third_party/zlib EXCLUDE_FROM_ALL)
 	set(ZLIB_LIBRARIES zlibstatic)
 	set(MINIZIP_LIBRARIES minizip)
-	set(ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/zlib ${CMAKE_CURRENT_SOURCE_DIR}/third_party/zlib/contrib/minizip)
+	set(ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/zlib)
+	set(MINIZIP_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/zlib/contrib)
 else()
-	find_package(ZLIB REQUIRED)
+	#find_package(ZLIB REQUIRED)
+	add_subdirectory(third_party/zlib EXCLUDE_FROM_ALL)
+	set(ZLIB_LIBRARIES zlibstatic)
 	set(MINIZIP_LIBRARIES minizip)
-#	find_package(minizip REQUIRED)
+	set(ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/zlib)
+	set(MINIZIP_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/zlib/contrib)
 endif()
 
 # add tinyxml2
@@ -122,6 +126,7 @@ set(FMT_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/third_party/fmt ${CMAKE_CURRENT
 include_directories(
 	${BOOST_INCLUDE_DIRS}
 	${ZLIB_INCLUDE_DIRS}
+	${MINIZIP_INCLUDE_DIRS}
 	${TINYXML2_INCLUDE_DIRS}
 	${FMT_INCLUDE_DIRS}
 )
