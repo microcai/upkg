@@ -7,7 +7,7 @@
 Q_IMPORT_PLUGIN(QICOPlugin);
 
 // Q_IMPORT_PLUGIN(QDirectFbIntegrationPlugin);
-Q_IMPORT_PLUGIN(QLinuxFbIntegrationPlugin);
+// Q_IMPORT_PLUGIN(QLinuxFbIntegrationPlugin);
 
 #if defined(QT_QPA_PLATFORM_XCB)
 Q_IMPORT_PLUGIN(QXcbIntegrationPlugin);
