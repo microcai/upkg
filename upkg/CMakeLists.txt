@@ -14,7 +14,7 @@ if(WIN32)
 	endif()
 endif()
 
-find_package(Qt6 6.4.1 COMPONENTS ${QtComponent} REQUIRED)
+find_package(Qt6 COMPONENTS ${QtComponent} REQUIRED)
 link_libraries(Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Concurrent)
 
 if(WIN32 AND MSVC AND ENABLE_QT_STATIC)
@@ -31,8 +31,6 @@ if(WIN32 AND MSVC AND ENABLE_QT_STATIC)
 		Qt6::QWindowsIntegrationPlugin
 		Qt6::QWindowsVistaStylePlugin
 		Qt6::QICOPlugin
-		Qt6::QDirectFbIntegrationPlugin
-		Qt6::QLinuxFbIntegrationPlugin
 	)
 
 	add_definitions(-DSTATIC_QT6)
