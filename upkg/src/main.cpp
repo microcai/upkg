@@ -41,6 +41,32 @@ int main(int argc, char *argv[])
 
 	QApplication::setWindowIcon(QIcon(":///upkg.ico"));
 
+	QPalette darkPalette;
+	darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
+	darkPalette.setColor(QPalette::WindowText, Qt::white);
+	darkPalette.setColor(QPalette::Base, QColor(25, 25, 25));
+	darkPalette.setColor(QPalette::AlternateBase, QColor(53, 53, 53));
+	darkPalette.setColor(QPalette::ToolTipBase, QColor(53, 53, 53));
+	darkPalette.setColor(QPalette::ToolTipText, Qt::white);
+	darkPalette.setColor(QPalette::Text, Qt::white);
+	darkPalette.setColor(QPalette::PlaceholderText, QColor(127, 127, 127));
+	darkPalette.setColor(QPalette::Button, QColor(53, 53, 53));
+	darkPalette.setColor(QPalette::ButtonText, Qt::white);
+	darkPalette.setColor(QPalette::BrightText, Qt::red);
+	darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
+	darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+	darkPalette.setColor(QPalette::HighlightedText, Qt::black);
+	darkPalette.setColor(QPalette::Disabled, QPalette::Text, QColor(164, 166, 168));
+	darkPalette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(164, 166, 168));
+	darkPalette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(164, 166, 168));
+	darkPalette.setColor(QPalette::Disabled, QPalette::HighlightedText, QColor(164, 166, 168));
+	darkPalette.setColor(QPalette::Disabled, QPalette::Base, QColor(68, 68, 68));
+	darkPalette.setColor(QPalette::Disabled, QPalette::Window, QColor(68, 68, 68));
+	darkPalette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(68, 68, 68));
+
+	a.setPalette(darkPalette);
+	a.setStyle("Fusion");
+
 #if defined(WIN32)
  	std::unique_ptr<QFont> default_font_ptr(new QFont("Consolas", 12));
  	globalDefaultFont = default_font_ptr.get();
