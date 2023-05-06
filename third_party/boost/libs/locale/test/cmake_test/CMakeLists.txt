@@ -17,13 +17,10 @@ else()
       # Primary dependencies
       assert
       config
-      function
+      core
       iterator
-      smart_ptr
-      static_assert
-      type_traits
+      predef
       thread
-      unordered
 
       # Secondary dependencies
       algorithm
@@ -36,10 +33,11 @@ else()
       container
       container_hash
       conversion
-      core
       date_time
+      describe
       detail
       exception
+      function
       function_types
       functional
       fusion
@@ -52,18 +50,20 @@ else()
       mpl
       numeric/conversion
       optional
-      predef
       preprocessor
       range
       ratio
       rational
       regex
+      smart_ptr
+      static_assert
       system
       throw_exception
       tokenizer
       tuple
-      type_index
+      type_traits
       typeof
+      unordered
       utility
       variant2
       winapi
