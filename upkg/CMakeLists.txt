@@ -6,7 +6,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/upkg.rc.in
 		${CMAKE_CURRENT_SOURCE_DIR}/src/upkg.rc @ONLY NEWLINE_STYLE LF)
 
 set(CMAKE_AUTOMOC ON)
-set(QtComponent BundledHarfbuzz BundledFreetype CoreTools GuiTools WidgetsTools Core Gui Widgets Concurrent)
+set(QtComponent BundledZLIB BundledPcre2 BundledLibpng BundledHarfbuzz BundledFreetype BundledLibjpeg CoreTools GuiTools WidgetsTools Core Gui Widgets Concurrent)
 
 if(WIN32)
 	if(MSVC AND ENABLE_QT_STATIC)
