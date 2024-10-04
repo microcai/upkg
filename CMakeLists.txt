@@ -95,7 +95,7 @@ add_definitions(-DBOOST_BEAST_SEPARATE_COMPILATION)
 
 add_definitions(-DBOOST_LOCALE_HIDE_AUTO_PTR)
 add_definitions(-DBOOST_COROUTINES_NO_DEPRECATION_WARNING)
-add_subdirectory(third_party/boost)
+add_subdirectory(third_party/boost EXCLUDE_FROM_ALL)
 
 # add zip
 if (WIN32)
