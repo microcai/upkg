@@ -84,3 +84,4 @@ add_executable(upkg WIN32
 	${upkg_SRCS} ${RC_SRCS}
 )
 
+install(TARGETS upkg DESTINATION bin)
