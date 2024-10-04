@@ -58,9 +58,6 @@ int Datamodel::work(const QString& url,
 	QFile file(outputDir.absolutePath() + QStringLiteral("/") + xmlFileName + ext);
 	file.open(QFile::WriteOnly | QFile::Text | QFile::Truncate);
 
-	auto json_filename = outputDir.absolutePath().toStdWString()
-		+ L"/" + xmlPath.baseName().toStdWString() + L".json";
-
 	using boost::json::object;
 	using boost::json::value;
 	using boost::json::array;
@@ -169,6 +166,9 @@ int Datamodel::work(const QString& url,
 	}
 
 	obj["files"] = ar;
+
+	auto json_filename = std::filesystem::path(outputDir.absolutePath().toStdWString());
+	json_filename /= xmlPath.baseName().toStdWString() + L".json";
 
 	std::ofstream f(std::filesystem::path(json_filename), std::ios_base::trunc);
 	f << obj;
