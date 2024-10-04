@@ -34,8 +34,8 @@ upkg* mainWindow = nullptr;
 
 int main(int argc, char *argv[])
 {
-	QCoreApplication::setOrganizationName(QStringLiteral("Daimage"));
-	QCoreApplication::setApplicationName(QStringLiteral("Upkg"));
+	QCoreApplication::setOrganizationName(QString("Daimage"));
+	QCoreApplication::setApplicationName(QString("Upkg"));
 
 	QApplication a(argc, argv);
 

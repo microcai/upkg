@@ -54,8 +54,8 @@ int Datamodel::work(const QString& url,
 {
 	QFileInfo xmlPath(xmlFileName);
 	QString ext = xmlPath.completeSuffix();
-	if (ext != "xml") ext = QStringLiteral(".xml"); else ext = QStringLiteral("");
-	QFile file(outputDir.absolutePath() + QStringLiteral("/") + xmlFileName + ext);
+	if (ext != "xml") ext = QString(".xml"); else ext = QString("");
+	QFile file(outputDir.absolutePath() + QString("/") + xmlFileName + ext);
 	file.open(QFile::WriteOnly | QFile::Text | QFile::Truncate);
 
 	using boost::json::object;
