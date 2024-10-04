@@ -29,7 +29,7 @@ if(WIN32 AND MSVC AND ENABLE_QT_STATIC)
 		${Qt6QTPCRE_LIBRARIES}
 		${Qt6QTFREETYPE_LIBRARIES}
 		Qt6::QWindowsIntegrationPlugin
-		Qt6::QWindowsVistaStylePlugin
+		Qt6::QModernWindowsStylePlugin
 		Qt6::QICOPlugin
 	)
 
