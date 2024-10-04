@@ -32,6 +32,12 @@ jobs:
         cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} "-DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install" -DCMAKE_PREFIX_PATH="${{ github.workspace }}/qt6_673_static_64/Qt6_binaries" -B build
         cmake --build build
 
+    - name: Upload generic artifacts
+      uses: actions/upload-artifact@v4.4.0
+      with:
+        name: upkg
+        path: build/bin/release
+
     - name: zip the result
       run: |
         cd build/bin/release
@@ -42,8 +48,3 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: build/bin/release/upkg.zip
-    - name: Upload generic artifacts
-      uses: actions/upload-artifact@v4.4.0
-      with:
-        name: upkg
-        path: build/bin/release
