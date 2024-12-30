@@ -9,8 +9,8 @@
 #include "upkg/url_view.hpp"
 #include "upkg/misc.hpp"
 
-#ifdef WIN32
-#include <Windows.h>
+#ifdef _WIN32
+#include <windows.h>
 #include <shellapi.h>
 #endif // WIN32
 

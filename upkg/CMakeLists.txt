@@ -17,7 +17,8 @@ endif()
 find_package(Qt6 COMPONENTS ${QtComponent} REQUIRED)
 link_libraries(Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Concurrent)
 
-if(WIN32 AND MSVC AND ENABLE_QT_STATIC)
+if(WIN32)
+	if (MSVC AND ENABLE_QT_STATIC)
 	# For static Windows builds, we also need to pull in the Qt6 Platform
 	# support library, which is not exposed to CMake properly, unfortunately
 	get_target_property(QT_LIB_DIR "${Qt6Widgets_LIBRARIES}" LOCATION)
@@ -35,6 +36,7 @@ if(WIN32 AND MSVC AND ENABLE_QT_STATIC)
 
 	add_definitions(-DSTATIC_QT6)
 	add_definitions(-DQT_STATICPLUGIN)
+	endif()
 else()
 	link_libraries(
 		udev

@@ -190,4 +190,5 @@ target_include_directories(zlibstatic SYSTEM BEFORE PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 set_target_properties(zlibstatic PROPERTIES FOLDER "third_party/")
 
+link_libraries(zlibstatic)
 add_subdirectory(contrib)

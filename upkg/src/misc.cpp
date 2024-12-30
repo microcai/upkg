@@ -6,7 +6,7 @@
 #include <ctime>
 #include <filesystem>
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #	include <windows.h>
 #	pragma comment(lib, "Version")
 #endif

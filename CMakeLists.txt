@@ -41,26 +41,23 @@ endif()
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
-if (MSVC)
+if (WIN32)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 	add_definitions(-D_SCL_SECURE_NO_WARNINGS)
-	add_definitions(-D_WIN32_WINNT=0x0601)
-	add_definitions(-DBOOST_ALL_STATIC_LINK)
-	add_definitions(-DBOOST_THREAD_USE_LIB)
-	add_definitions(-DBOOST_FILESYSTEM_STATIC_LINK)
-	add_definitions(-DBOOST_USE_WINAPI_VERSION=0x0601)
 	add_definitions(-DWIN32_LEAN_AND_MEAN)
 	add_definitions(-DNOMINMAX)
 	add_definitions(-D_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS)
 
+	if (MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /bigobj")
 	set(CMAKE_CXX_STACK_SIZE "20000000")
+	endif()
 
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DENABLE_LOGGER -DDISABLE_LOGGER_TO_CONSOLE -DLOGGER_DBG_VIEW -DDISABLE_WRITE_LOGGING")
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DENABLE_LOGGER -DDISABLE_LOGGER_TO_CONSOLE -DLOGGER_DBG_VIEW -DDISABLE_WRITE_LOGGING")
 	set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -DENABLE_LOGGER -DDISABLE_LOGGER_TO_CONSOLE -DLOGGER_DBG_VIEW -DDISABLE_WRITE_LOGGING")
 
-	link_libraries(opengl32.lib imm32.lib ws2_32.lib Wtsapi32.lib winmm.lib shell32.lib uxtheme.lib dwmapi.lib Crypt32.lib netapi32.lib Userenv.lib)
+	link_libraries(opengl32.lib imm32.lib ws2_32.lib wtsapi32.lib winmm.lib shell32.lib uxtheme.lib dwmapi.lib crypt32.lib netapi32.lib userenv.lib)
 endif()
 
 CHECK_CXX_COMPILER_FLAG(-fvisibility-inlines-hidden COMPILER_HAS_VISIBILITY_INLINE_HIDDEN)
@@ -135,7 +132,7 @@ if (ENABLE_SYSTEM_OPENSSL)
 	find_package(OpenSSL)
 else()
 	add_subdirectory(third_party/openssl)
-	if (NOT MSVC AND NOT APPLE)
+	if (NOT WIN32 AND NOT APPLE)
 		set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--exclude-libs,ALL ${CMAKE_SHARED_LINKER_FLAGS}")
 		set(CMAKE_MODULE_LINKER_FLAGS "-Wl,--exclude-libs,ALL ${CMAKE_MODULE_LINKER_FLAGS}")
 		set(CMAKE_EXE_LINKER_FLAGS "-Wl,--exclude-libs,ALL ${CMAKE_EXE_LINKER_FLAGS}")
@@ -158,7 +155,7 @@ link_libraries(
 
 if (WIN32)
 	link_libraries(
-		Secur32.lib
+		secur32.lib
 	)
 endif()
 

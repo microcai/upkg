@@ -4,7 +4,7 @@ project(Boost)
 include(CMakeDetermineASMCompiler)
 include(CheckFunctionExists)
 
-if (WIN32)
+if (MSVC)
 	enable_language(ASM_MASM)
 else()
 	enable_language(ASM)
@@ -91,8 +91,13 @@ set(BOOST_CONTEXT_SRC
 
 if (WIN32)
 	list(APPEND BOOST_CONTEXT_SRC libs/context/src/windows/stack_traits.cpp)
+	if (MSVC)
 	set(ASSEMBLER masm)
 	set(ASM_FILE_EXT "asm")
+	else()
+	set(ASSEMBLER clang_gas)
+	set(ASM_FILE_EXT "S")
+	endif()
 	set(EXEUCTABLEFORMAT "pe")
 	set(SYSABI "ms")
 
